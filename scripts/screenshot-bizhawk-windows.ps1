@@ -2,8 +2,10 @@ $ErrorActionPreference = 'Stop'
 
 $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $Rom = Join-Path $Root 'build\rom\mega-3dk.bin'
-$EmulatorRoot = Join-Path $Root 'emulator'
+$EmulatorRoot = Join-Path $Root 'emulators'
 $ScreenshotsDir = Join-Path $Root 'screenshots'
+$Config = Join-Path $EmulatorRoot 'config.ini'
+$TempDir = Join-Path $Root 'build\tmp'
 $DelayMs = 2000
 
 if ($args.Count -ge 1 -and $args[0]) {
@@ -14,38 +16,40 @@ if (-not (Test-Path $Rom)) {
     throw "ROM not found: $Rom"
 }
 
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-
 $Exe = Get-ChildItem $EmulatorRoot -Filter 'EmuHawk.exe' -Recurse | Select-Object -First 1
 if (-not $Exe) {
     throw "BizHawk not found under: $EmulatorRoot"
 }
 
 New-Item -ItemType Directory -Force -Path $ScreenshotsDir | Out-Null
-$Output = Join-Path $ScreenshotsDir ("bizhawk-{0}.png" -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
+New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
 
-$Process = Start-Process -FilePath $Exe.FullName -ArgumentList @($Rom) -WorkingDirectory $Exe.DirectoryName -PassThru
+$Output = Join-Path $ScreenshotsDir ("bizhawk-{0}.png" -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
+$LuaPath = Join-Path $TempDir 'bizhawk-screenshot.lua'
+$OutputLua = $Output -replace '\\','\\'
+
+$LuaScript = @"
+for i = 1, 8 do
+  emu.frameadvance()
+end
+
+client.screenshot("$OutputLua")
+client.pause()
+client.closerom()
+client.exitCode(0)
+"@
+
+Set-Content -LiteralPath $LuaPath -Value $LuaScript -Encoding ASCII
+
+$Process = Start-Process -FilePath $Exe.FullName -ArgumentList @('--config', $Config, '--lua', $LuaPath, $Rom) -WorkingDirectory $Exe.DirectoryName -PassThru
 Start-Sleep -Milliseconds $DelayMs
 
-$Shell = New-Object -ComObject WScript.Shell
-if (-not $Shell.AppActivate($Process.Id)) {
-    Start-Sleep -Milliseconds 500
-    [void]$Shell.AppActivate($Process.Id)
+for ($i = 0; $i -lt 80 -and -not (Test-Path $Output); $i++) {
+    Start-Sleep -Milliseconds 250
 }
 
-Start-Sleep -Milliseconds 150
-[void]$Shell.SendKeys('%{PRTSC}')
-
-Start-Sleep -Milliseconds 250
-if (-not [System.Windows.Forms.Clipboard]::ContainsImage()) {
-    throw 'BizHawk screenshot failed: clipboard has no image'
+if (-not (Test-Path $Output)) {
+    throw 'BizHawk screenshot failed: Lua screenshot file was not created'
 }
 
-$Image = [System.Windows.Forms.Clipboard]::GetImage()
-if (-not $Image) {
-    throw 'BizHawk screenshot failed: no image returned from clipboard'
-}
-
-$Image.Save($Output, [System.Drawing.Imaging.ImageFormat]::Png)
 Write-Host "Screenshot saved: $Output"

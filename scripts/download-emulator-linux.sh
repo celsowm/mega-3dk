@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-mkdir -p "$ROOT/emulator"
-cd "$ROOT/emulator"
+mkdir -p "$ROOT/emulators"
+cd "$ROOT/emulators"
 URL="https://www.retrodev.com/blastem/nightlies/blastem64.tar.gz"
 curl -L "$URL" -o blastem.tar.gz || {
   echo "falha no download automático do BlastEm; ajuste a URL no script" >&2

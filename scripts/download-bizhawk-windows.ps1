@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
 $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
-$EmulatorRoot = Join-Path $Root 'emulator'
+$EmulatorRoot = Join-Path $Root 'emulators'
 $Zip = Join-Path $EmulatorRoot 'bizhawk-win-x64.zip'
 $Headers = @{
     'User-Agent' = 'mega-3dk'

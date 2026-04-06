@@ -4,9 +4,11 @@
 
     xdef present_frame
     xdef present_fill_debug_tiles
+    xdef present_fill_debug_pattern_tiles
     xdef present_pack_full_frame_4bpp_to_tiles
     xdef present_build_linear_name_table
     xdef present_upload_minimal_cpu
+    xdef present_frame_debug_pattern
 
     xref color_buffer
     xref present_tile_buffer
@@ -23,6 +25,12 @@ present_frame:
     bsr     present_upload_minimal_cpu
     rts
 
+present_frame_debug_pattern:
+    bsr     present_fill_debug_pattern_tiles
+    bsr     present_build_linear_name_table
+    bsr     present_upload_minimal_cpu
+    rts
+
 ; Debug fill: set all tile bytes to $FF so the visible area should turn solid white.
 present_fill_debug_tiles:
     movem.l d0-d2/a0,-(sp)
@@ -33,6 +41,36 @@ present_fill_debug_tiles:
     move.l  d1,(a0)+
     dbra    d0,.loop
     movem.l (sp)+,d0-d2/a0
+    rts
+
+; Deterministic tile pattern for BizHawk VRAM/name-table validation.
+; Each tile receives a unique solid color nibble derived from its tile index.
+present_fill_debug_pattern_tiles:
+    movem.l d0-d4/a0,-(sp)
+    lea     present_tile_buffer,a0
+    moveq   #0,d0
+.tile_loop:
+    cmpi.w  #PRESENT_TILE_COUNT,d0
+    bge.s   .done
+
+    move.w  d0,d1
+    andi.w  #$000F,d1
+    bne.s   .color_ok
+    moveq   #1,d1
+.color_ok:
+    move.w  d1,d2
+    lsl.w   #4,d2
+    or.b    d2,d1
+
+    moveq   #32-1,d3
+.byte_loop:
+    move.b  d1,(a0)+
+    dbra    d3,.byte_loop
+
+    addq.w  #1,d0
+    bra.s   .tile_loop
+.done:
+    movem.l (sp)+,d0-d4/a0
     rts
 
 present_pack_full_frame_4bpp_to_tiles:
@@ -124,8 +162,6 @@ present_build_linear_name_table:
 present_upload_minimal_cpu:
     movem.l d0-d2/a0,-(sp)
 
-    move.w  #VDP_REG_MODE2_OFF,VDP_CTRL  ; display off during upload
-
     lea     present_tile_buffer,a0
     move.w  #(VDP_VRAM_FRAME_TILES + (PRESENT_TILE_BASE*32)),d0
     move.w  #(PRESENT_TILE_BYTES/2),d1
@@ -135,8 +171,6 @@ present_upload_minimal_cpu:
     move.w  #VDP_VRAM_PLANEA,d0
     move.w  #(PRESENT_PLANE_W*28),d1
     bsr     vdp_upload_words_cpu
-
-    move.w  #VDP_REG_MODE2,VDP_CTRL      ; display on
 
     movem.l (sp)+,d0-d2/a0
     rts

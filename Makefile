@@ -9,13 +9,13 @@ TOOLS    := $(ROOT)/tools
 ifeq ($(OS),Windows_NT)
   VASM     := $(ROOT)/toolchain/vasm/vasmm68k_mot.exe
   BLASTEM  := $(shell powershell -NoProfile -Command \
-    "(Get-ChildItem '$(ROOT)/emulator' -Filter 'blastem*.exe' -Recurse | Select-Object -First 1).FullName")
+    "(Get-ChildItem '$(ROOT)/emulators' -Filter 'blastem*.exe' -Recurse | Select-Object -First 1).FullName")
   BIZHAWK  := $(shell powershell -NoProfile -Command \
-    "(Get-ChildItem '$(ROOT)/emulator' -Filter 'EmuHawk.exe' -Recurse | Select-Object -First 1).FullName")
+    "(Get-ChildItem '$(ROOT)/emulators' -Filter 'EmuHawk.exe' -Recurse | Select-Object -First 1).FullName")
   MKDIR    = powershell -NoProfile -Command "New-Item -ItemType Directory -Force -Path '$(1)' | Out-Null"
 else
   VASM     := $(ROOT)/toolchain/vasm/vasmm68k_mot
-  BLASTEM  := $(shell find $(ROOT)/emulator -maxdepth 2 -type f \( -name 'blastem' -o -name 'blastem64' \) 2>/dev/null | head -n 1)
+  BLASTEM  := $(shell find $(ROOT)/emulators -maxdepth 2 -type f \( -name 'blastem' -o -name 'blastem64' \) 2>/dev/null | head -n 1)
   BIZHAWK  :=
   MKDIR    = mkdir -p $(1)
 endif
@@ -55,14 +55,14 @@ ifeq ($(OS),Windows_NT)
 ifneq ($(strip $(BLASTEM)),)
 	powershell -NoProfile -Command "Start-Process '$(BLASTEM)' -ArgumentList '$(ROM)'"
 else
-	@echo "BlastEm not found under: $(ROOT)/emulator"
+	@echo "BlastEm not found under: $(ROOT)/emulators"
 	@exit /b 1
 endif
 else
 ifneq ($(strip $(BLASTEM)),)
 	$(BLASTEM) $(ROM) &
 else
-	@echo "BlastEm not found under: $(ROOT)/emulator"
+	@echo "BlastEm not found under: $(ROOT)/emulators"
 	@false
 endif
 endif
@@ -72,7 +72,7 @@ ifeq ($(OS),Windows_NT)
 ifneq ($(strip $(BIZHAWK)),)
 	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-bizhawk-windows.ps1
 else
-	@echo "BizHawk not found under: $(ROOT)/emulator"
+	@echo "BizHawk not found under: $(ROOT)/emulators"
 	@exit /b 1
 endif
 else
@@ -85,7 +85,7 @@ ifeq ($(OS),Windows_NT)
 ifneq ($(strip $(BLASTEM)),)
 	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/screenshot-windows.ps1
 else
-	@echo "BlastEm not found under: $(ROOT)/emulator"
+	@echo "BlastEm not found under: $(ROOT)/emulators"
 	@exit /b 1
 endif
 else
@@ -98,7 +98,7 @@ ifeq ($(OS),Windows_NT)
 ifneq ($(strip $(BIZHAWK)),)
 	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/screenshot-bizhawk-windows.ps1
 else
-	@echo "BizHawk not found under: $(ROOT)/emulator"
+	@echo "BizHawk not found under: $(ROOT)/emulators"
 	@exit /b 1
 endif
 else

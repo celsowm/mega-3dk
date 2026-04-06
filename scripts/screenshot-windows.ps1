@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 
 $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $Rom = Join-Path $Root 'build\rom\mega-3dk.bin'
-$EmulatorRoot = Join-Path $Root 'emulator'
+$EmulatorRoot = Join-Path $Root 'emulators'
 $DelayMs = 2000
 
 if ($args.Count -ge 1 -and $args[0]) {

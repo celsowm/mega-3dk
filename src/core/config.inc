@@ -5,7 +5,9 @@ RENDER_W             equ 160
 RENDER_H             equ 112
 RENDER_COLOR_BG      equ 0
 RENDER_COLOR_FG      equ 15
-RENDER_PIPELINE_MODE equ 2      ; 0=wire, 1=visible-face wire, 2=solid fill
+RENDER_PIPELINE_MODE equ 0      ; 0=wire, 1=visible-face wire, 2=solid fill
+DEBUG_VIEW_MODE      equ 0      ; 0=normal, 1=static scene, 2=present pattern
+DEBUG_FREEZE_SCENE   equ 1      ; 1 disables auto-rotation for BizHawk inspection
 
 SCREEN_CENTER_X      equ 80
 SCREEN_CENTER_Y      equ 56
@@ -21,7 +23,7 @@ PRESENT_TILE_H       equ (RENDER_H/8)
 PRESENT_TILE_COUNT   equ (PRESENT_TILE_W*PRESENT_TILE_H)
 PRESENT_TILE_BYTES   equ (PRESENT_TILE_COUNT*32)
 PRESENT_NAME_BYTES   equ (PRESENT_TILE_COUNT*2)
-PRESENT_TILE_BASE    equ 1
+PRESENT_TILE_BASE    equ 1      ; tile 0 stays blank for the cleared area outside 20x14
 PRESENT_PLANE_W      equ 32
 PRESENT_OFF_X        equ ((40-PRESENT_TILE_W)/2)
 PRESENT_OFF_Y        equ ((28-PRESENT_TILE_H)/2)

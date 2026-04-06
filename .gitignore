@@ -1,6 +1,6 @@
 build/
 toolchain/
-emulator/
+emulators/
 *.bin
 *.gen
 *.rom
@@ -10,5 +10,8 @@ emulator/
 *.lst
 *.sym
 *.bak
+*.zip
+screenshots/*.png
+a.out
 .DS_Store
 Thumbs.db

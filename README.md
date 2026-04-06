@@ -9,7 +9,7 @@
 - Make the path `framebuffer -> tiles -> name table -> VRAM` more auditable
 
 ## Important fixes in this version
-- `PRESENT_TILE_BASE` is now **0**, aligned with tile upload
+- `PRESENT_TILE_BASE` stays **1** so tile `0` remains blank outside the centered 20x14 area
 - `vdp_init` now calls `vdp_init_default_palette`
 
 - Separate support for writing to **CRAM** has been added

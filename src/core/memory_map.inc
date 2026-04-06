@@ -47,4 +47,15 @@ tri_tmp_vertices     equ WRAM_BASE+$3940
 tri_setup_state      equ WRAM_BASE+$3958
 present_tile_buffer  equ WRAM_BASE+$3998
 present_name_table   equ WRAM_BASE+$5EC8
+debug_last_span_y    equ WRAM_BASE+$65C8
+debug_last_span_x0   equ WRAM_BASE+$65CA
+debug_last_span_x1   equ WRAM_BASE+$65CC
+debug_last_tri_flags equ WRAM_BASE+$65CE
+debug_last_tri_color equ WRAM_BASE+$65D0
+debug_last_tri_v0x   equ WRAM_BASE+$65D2
+debug_last_tri_v0y   equ WRAM_BASE+$65D4
+debug_last_tri_v1x   equ WRAM_BASE+$65D6
+debug_last_tri_v1y   equ WRAM_BASE+$65D8
+debug_last_tri_v2x   equ WRAM_BASE+$65DA
+debug_last_tri_v2y   equ WRAM_BASE+$65DC
     endif

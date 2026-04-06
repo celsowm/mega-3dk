@@ -1,5 +1,6 @@
     include "src/core/config.inc"
     include "src/core/types.inc"
+    include "src/core/memory_map.inc"
     include "src/render/renderer.inc"
 
     xdef tri_setup
@@ -22,6 +23,14 @@ tri_setup:
     move.w  d4,16(a0)
     move.w  d5,18(a0)
 
+    move.w  d0,debug_last_tri_v0x
+    move.w  d1,debug_last_tri_v0y
+    move.w  d2,debug_last_tri_v1x
+    move.w  d3,debug_last_tri_v1y
+    move.w  d4,debug_last_tri_v2x
+    move.w  d5,debug_last_tri_v2y
+    move.w  tri_setup_state+TS_COLOR,debug_last_tri_color
+
     ; Determine whether the middle vertex lies left or right of the long edge (V0->V2).
     ; Long edge vector A = V2 - V0
     ; Mid point vector B = V1 - V0
@@ -39,14 +48,16 @@ tri_setup:
     muls.w  d6,d5                  ; Ay*Bx
     sub.l   d5,d7                  ; cross = Ax*By - Ay*Bx
 
-    ; If cross < 0, V1 is on the right of V0->V2 (Short edge on RIGHT, flag=0)
-    ; If cross > 0, V1 is on the left of V0->V2 (Short edge on LEFT, flag=1)
+    ; Contract with tri_fill_fast:
+    ; flag=0 => short edge on RIGHT  (long edge provides x_left)
+    ; flag=1 => short edge on LEFT   (short edge provides x_left)
     moveq   #0,d6
     tst.l   d7
     blt.s   .flags_ok              ; Cross < 0: Short edge on right, flag=0
     moveq   #1,d6                  ; Cross > 0: Short edge on left, flag=1
 .flags_ok:
     move.w  d6,tri_setup_state+TS_FLAGS
+    move.w  d6,debug_last_tri_flags
 
     move.w  tri_setup_state+TS_COLOR,d7
     andi.w  #$000F,d7

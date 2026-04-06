@@ -1,5 +1,6 @@
     include "src/core/config.inc"
     include "src/core/types.inc"
+    include "src/core/memory_map.inc"
     include "src/render/renderer.inc"
 
     xdef tri_fill_fast
@@ -193,6 +194,9 @@ tri_fill_fast:
     ble.s   .ds_x1_ok
     move.w  #RENDER_W-1,d3
 .ds_x1_ok:
+    move.w  d5,debug_last_span_y
+    move.w  d2,debug_last_span_x0
+    move.w  d3,debug_last_span_x1
     cmp.w   d3,d2
     bgt.w   .ds_pop_done           ; Nothing to draw
 
@@ -227,7 +231,8 @@ tri_fill_fast:
 
 .ds_mid_check:
     move.w  d4,d2
-    sub.w   d6,d2                  ; Bytes remaining
+    sub.w   d6,d2                  ; distance from current to end byte
+    subq.w  #1,d2                  ; middle bytes only: last byte is handled separately
     blt.s   .ds_last_byte
 .ds_mid_loop:
     move.b  d7,(a2)+

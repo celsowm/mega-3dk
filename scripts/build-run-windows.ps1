@@ -5,7 +5,7 @@ $RomDir = Join-Path $Root 'build\rom'
 $Rom = Join-Path $RomDir 'mega-3dk.bin'
 $Entry = Join-Path $Root 'src\boot\boot.asm'
 $Vasm = Join-Path $Root 'toolchain\vasm\vasmm68k_mot.exe'
-$EmulatorRoot = Join-Path $Root 'emulator'
+$EmulatorRoot = Join-Path $Root 'emulators'
 
 if (-not (Test-Path $Vasm)) {
     throw "vasm not found: $Vasm"

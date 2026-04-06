@@ -25,8 +25,8 @@ The Makefile performs real assembly and emulator launch. Key targets:
 
 ### Toolchain
 - **Assembler:** `toolchain/vasm/vasmm68k_mot.exe` (Motorola syntax, flat binary output)
-- **Emulator:** `emulator/blastem-win64-0.6.3-pre/blastem.exe`
-- **BizHawk:** `emulator/BizHawk-<version>-win-x64/EmuHawk.exe` or equivalent extracted folder
+- **Emulator:** `emulators/blastem-win64-0.6.3-pre/blastem.exe`
+- **BizHawk:** `emulators/BizHawk-<version>-win-x64/EmuHawk.exe` or equivalent extracted folder
 - **Asset generators:** `tools/gen_lut.py` (sin/recip LUTs), `tools/pack_mesh.py` (mesh data)
 - **Screenshot helper:** `scripts/screenshot-windows.ps1` launches BlastEm, waits 2 seconds, focuses the window, and sends `P`
 - **BizHawk screenshot helper:** `scripts/screenshot-bizhawk-windows.ps1` launches BizHawk, focuses the window, sends `Alt+PrintScreen`, and saves the clipboard image to `screenshots/`

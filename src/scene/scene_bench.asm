@@ -17,9 +17,11 @@ scene_bench_init:
     rts
 
 scene_bench_update:
+    ifeq DEBUG_FREEZE_SCENE
     ; rotação automática leve
     addq.w #2,scene_rot_y
     addq.w #1,scene_rot_x
+    endc
 
     ; input já integrado à API, mesmo antes da leitura real do pad.
     move.w pad_cur,d0
