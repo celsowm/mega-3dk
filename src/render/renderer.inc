@@ -1,0 +1,2 @@
+RENDER_COLOR_BG     equ 0
+RENDER_COLOR_FG     equ 15

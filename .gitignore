@@ -1,0 +1,14 @@
+build/
+toolchain/
+emulator/
+*.bin
+*.gen
+*.rom
+*.md.swp
+*.tmp
+*.o
+*.lst
+*.sym
+*.bak
+.DS_Store
+Thumbs.db

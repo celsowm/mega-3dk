@@ -1,0 +1,170 @@
+    include "src/core/config.inc"
+    include "src/core/types.inc"
+
+    xdef plot_pixel
+    xdef draw_line
+    xdef draw_scene_wire
+
+    xref color_buffer
+    xref proj_vertices
+    xref mesh_cube_edges
+    xref mesh_cube_edge_count
+    xref prof_lines_drawn
+
+    xdef line_x1
+    xdef line_y1
+    xdef line_dx
+    xdef line_dy
+    xdef line_sx
+    xdef line_sy
+    xdef line_err
+    xdef line_e2
+
+; d0=x d1=y d4=color(0..15)
+plot_pixel:
+    cmpi.w  #0,d0
+    blt.s   .out
+    cmpi.w  #RENDER_W,d0
+    bge.s   .out
+    cmpi.w  #0,d1
+    blt.s   .out
+    cmpi.w  #RENDER_H,d1
+    bge.s   .out
+
+    movem.l d2-d3/a0,-(sp)
+    lea     color_buffer,a0
+
+    move.w  d1,d2
+    mulu.w  #(RENDER_W/2),d2
+    move.w  d0,d3
+    lsr.w   #1,d3
+    add.w   d3,d2
+    adda.w  d2,a0
+
+    move.b  (a0),d2
+    btst    #0,d0
+    bne.s   .odd
+.even:
+    andi.b  #$0F,d2
+    andi.w  #$000F,d4
+    lsl.b   #4,d4
+    or.b    d4,d2
+    move.b  d2,(a0)
+    bra.s   .done
+.odd:
+    andi.b  #$F0,d2
+    andi.w  #$000F,d4
+    or.b    d4,d2
+    move.b  d2,(a0)
+.done:
+    movem.l (sp)+,d2-d3/a0
+.out:
+    rts
+
+; d0=x0 d1=y0 d2=x1 d3=y1 d4=color
+; v4.3: Bresenham inteiro em versão legível, usando estado temporário em bss.
+draw_line:
+    movem.l d5-d7,-(sp)
+    addq.l  #1,prof_lines_drawn
+    move.w  d2,line_x1
+    move.w  d3,line_y1
+    move.w  d4,d7
+
+    move.w  d2,d5
+    sub.w   d0,d5
+    bpl.s   .dx_ok
+    neg.w   d5
+.dx_ok:
+    move.w  d5,line_dx
+
+    move.w  d3,d6
+    sub.w   d1,d6
+    bpl.s   .dy_abs
+    neg.w   d6
+.dy_abs:
+    neg.w   d6
+    move.w  d6,line_dy
+
+    move.w  #1,line_sx
+    cmp.w   d2,d0
+    ble.s   .sx_ok
+    move.w  #-1,line_sx
+.sx_ok:
+
+    move.w  #1,line_sy
+    cmp.w   d3,d1
+    ble.s   .sy_ok
+    move.w  #-1,line_sy
+.sy_ok:
+
+    move.w  line_dx,d5
+    add.w   line_dy,d5
+    move.w  d5,line_err
+
+.loop:
+    move.w  d7,d4
+    bsr     plot_pixel
+
+    cmp.w   line_x1,d0
+    bne.s   .step
+    cmp.w   line_y1,d1
+    beq.s   .done
+.step:
+    move.w  line_err,d5
+    add.w   d5,d5
+    move.w  d5,line_e2
+
+    cmp.w   line_dy,d5
+    blt.s   .skip_x
+    add.w   line_dy,line_err
+    add.w   line_sx,d0
+.skip_x:
+    move.w  line_e2,d5
+    cmp.w   line_dx,d5
+    bgt.s   .skip_y
+    add.w   line_dx,line_err
+    add.w   line_sy,d1
+.skip_y:
+    bra.s   .loop
+.done:
+    movem.l (sp)+,d5-d7
+    rts
+
+; Percorre as 12 arestas do cubo e liga os vértices projetados.
+draw_scene_wire:
+    movem.l d2-d7/a0-a1,-(sp)
+    lea     mesh_cube_edges,a0
+    move.w  mesh_cube_edge_count,d7
+    subq.w  #1,d7
+.edge_loop:
+    move.w  (a0)+,d5
+    move.w  (a0)+,d6
+
+    lea     proj_vertices,a1
+
+    move.w  d5,d0
+    lsl.w   #3,d0
+    move.w  VERT2_X(a1,d0.w),d0
+    move.w  VERT2_Y(a1,d0.w),d1
+
+    move.w  d6,d2
+    lsl.w   #3,d2
+    move.w  VERT2_X(a1,d2.w),d2
+    move.w  VERT2_Y(a1,d2.w),d3
+
+    moveq   #RENDER_COLOR_FG,d4
+    bsr     draw_line
+    dbra    d7,.edge_loop
+
+    movem.l (sp)+,d2-d7/a0-a1
+    rts
+
+    section bss
+line_x1:    ds.w 1
+line_y1:    ds.w 1
+line_dx:    ds.w 1
+line_dy:    ds.w 1
+line_sx:    ds.w 1
+line_sy:    ds.w 1
+line_err:   ds.w 1
+line_e2:    ds.w 1

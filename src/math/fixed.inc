@@ -1,0 +1,2 @@
+FIX_SHIFT equ 16
+FIX_ONE   equ 1<<FIX_SHIFT

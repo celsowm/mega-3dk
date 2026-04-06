@@ -1,0 +1,3 @@
+palette_flat16:
+    dc.w $0000,$0EEE,$00EE,$0E0E,$0EE0,$0CCC,$0888,$0444
+    dc.w $0AAA,$0666,$0E88,$08E8,$088E,$0EE8,$08EE,$0EEE

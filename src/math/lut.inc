@@ -1,0 +1,2 @@
+SIN_LUT_COUNT       equ 1024
+RECIP_LUT_COUNT     equ 1024
