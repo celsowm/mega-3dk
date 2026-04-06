@@ -17,14 +17,11 @@
     include "../render/wire.asm"
     include "../render/present.asm"
     include "../debug/overlay.asm"
-Reset:
+BootEntry:
     move    #$2700,sr
-    lea     stack_end,sp
+    move.l  #STACK_TOP,sp
     jsr     main_init
 main_forever:
     jsr     main_loop
     bra     main_forever
-stack_space:
-    ds.b    1024
-stack_end:
 EndROM:

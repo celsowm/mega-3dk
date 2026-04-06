@@ -40,12 +40,3 @@ scene_bench_update:
     addq.w #2,scene_rot_x
 .no_down:
     rts
-
-scene_active_mesh:
-    ds.l 1
-scene_rot_x:
-    ds.w 1
-scene_rot_y:
-    ds.w 1
-scene_rot_z:
-    ds.w 1

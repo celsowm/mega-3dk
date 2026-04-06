@@ -148,13 +148,13 @@ draw_scene_wire:
 
     move.w  d5,d0
     lsl.w   #3,d0
-    move.w  VERT2_X(a1,d0.w),d0
     move.w  VERT2_Y(a1,d0.w),d1
+    move.w  VERT2_X(a1,d0.w),d0
 
     move.w  d6,d2
     lsl.w   #3,d2
-    move.w  VERT2_X(a1,d2.w),d2
     move.w  VERT2_Y(a1,d2.w),d3
+    move.w  VERT2_X(a1,d2.w),d2
 
     moveq   #RENDER_COLOR_FG,d4
     bsr     draw_line
@@ -162,12 +162,3 @@ draw_scene_wire:
 
     movem.l (sp)+,d2-d7/a0-a1
     rts
-
-line_x1:    ds.w 1
-line_y1:    ds.w 1
-line_dx:    ds.w 1
-line_dy:    ds.w 1
-line_sx:    ds.w 1
-line_sy:    ds.w 1
-line_err:   ds.w 1
-line_e2:    ds.w 1

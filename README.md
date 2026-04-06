@@ -1,41 +1,42 @@
 # mega-3dk v4.7
 
-Base de engine 3D em 68000 para Mega Drive, organizada para crescer de **wireframe** para **flat-shaded triangles**.
+68000 3D engine base for Mega Drive, organized to grow from **wireframe** to **flat-shaded triangles**.
 
-## foco desta v4.7
-- reduzir os pontos obscuros do bring-up
-- corrigir o desalinhamento entre `tile base` e upload dos tiles
-- subir uma paleta padrão logo no `vdp_init`
-- deixar o caminho `framebuffer -> tiles -> name table -> VRAM` mais auditável
+## Focus of this v4.7
+- Reduce obscure points in the bring-up
+- Correct the misalignment between `tile base` and tile upload
+- Bring up a default palette right in `vdp_init`
+- Make the path `framebuffer -> tiles -> name table -> VRAM` more auditable
 
-## correções importantes desta versão
-- `PRESENT_TILE_BASE` agora é **0**, alinhado com o upload dos tiles
-- `vdp_init` agora chama `vdp_init_default_palette`
-- entrou suporte separado para escrita em **CRAM**
-- o `present_upload_minimal_cpu` agora documenta e usa a base de tiles de forma coerente
-- `STACK_TOP` foi definido em `config.inc`, eliminando uma lacuna do boot
+## Important fixes in this version
+- `PRESENT_TILE_BASE` is now **0**, aligned with tile upload
+- `vdp_init` now calls `vdp_init_default_palette`
 
-## estado real
-Esta v4.7 ainda é um **bring-up técnico sério**, não uma demo confirmada no emulador. Mas o trecho crítico agora ficou mais curto e com menos inconsistências óbvias.
+- Separate support for writing to **CRAM** has been added
+- `present_upload_minimal_cpu` now documents and uses the tile base coherently
+- `STACK_TOP` has been defined in `config.inc`, eliminating a boot loophole
 
-## o que já está mais concreto
-- buffer interno 160x112 em 4bpp
-- `plot_pixel(x,y,color)` em nibble alto/baixo
-- Bresenham inteiro em `draw_line`
-- cubo descrito por arestas
-- transformação `cube-first`
-- packing do framebuffer em tiles 8x8
-- name table linear 20x14
-- upload mínimo para VRAM por CPU
-- paleta padrão em CRAM no init
+## Actual state
+This v4.7 is still a **serious technical bring-up**, not a confirmed demo in the emulator. But the critical section is now shorter and has fewer obvious inconsistencies.
 
-## o que ainda falta para chamar de demo pronta
-- validar o primeiro frame no emulador
-- conferir o comando exato do VDP se aparecer tela preta ou layout incorreto
-- leitura real do controle 3-button
-- revisar o `present` para DMA depois do primeiro frame validado
+## What's already more concrete
+- Internal buffer 160x112 in 4bpp
+- `plot_pixel(x,y,color)` in high/low nibble
+- Entire Bresenham in `draw_line`
+- Cube described by edges
+- `cube-first` transformation
+- Packing of the framebuffer in 8x8 tiles
+- Linear name table 20x14
+- Minimum upload to VRAM per CPU
+- Default palette in CRAM at init
 
-## marcos seguintes
-- v4.8: primeiro frame visual validado
-- v4.9: backface culling + faces visíveis
-- v5.0: flat-shaded triangles
+## What's still missing to call it a ready demo
+- Validate the first frame in the emulator
+- Check the exact VDP command if a black screen or incorrect layout appears
+- Actual reading of the 3-button controller
+- Review the `present` for DMA after the first frame is validated
+
+## Next milestones
+- v4.8: First visual frame validated
+- v4.9: Backface culling + visible faces
+- v5.0: Flat-shaded triangles

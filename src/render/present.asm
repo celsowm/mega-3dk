@@ -81,12 +81,26 @@ present_pack_full_frame_4bpp_to_tiles:
 present_build_linear_name_table:
     movem.l d2-d4/a0,-(sp)
     lea     present_name_table,a0
+    ; clear full 32x28 plane
+    move.w  #(PRESENT_PLANE_W*28)-1,d1
+.clr:
+    move.w  #0,(a0)+
+    dbra    d1,.clr
+    ; fill render area at (PRESENT_OFF_X, PRESENT_OFF_Y)
+    lea     present_name_table,a0
+    move.w  #(PRESENT_OFF_Y*PRESENT_PLANE_W+PRESENT_OFF_X),d1
+    lsl.w   #1,d1
+    adda.w  d1,a0
     move.w  #PRESENT_TILE_BASE,d0
-    move.w  #PRESENT_TILE_COUNT-1,d1
-.loop:
+    move.w  #PRESENT_TILE_H-1,d3
+.row:
+    move.w  #PRESENT_TILE_W-1,d2
+.col:
     move.w  d0,(a0)+
     addq.w  #1,d0
-    dbra    d1,.loop
+    dbra    d2,.col
+    adda.w  #((PRESENT_PLANE_W-PRESENT_TILE_W)*2),a0
+    dbra    d3,.row
     movem.l (sp)+,d2-d4/a0
     rts
 
@@ -104,7 +118,7 @@ present_upload_minimal_cpu:
 
     lea     present_name_table,a0
     move.w  #VDP_VRAM_PLANEA,d0
-    move.w  #(PRESENT_NAME_BYTES/2),d1
+    move.w  #(PRESENT_PLANE_W*28),d1
     bsr     vdp_upload_words_cpu
 
     movem.l (sp)+,d0-d2/a0

@@ -45,14 +45,21 @@ wait_vblank:
     rts
 
 ; d0 = endereço VRAM 0..$FFFF
+; Encode the Genesis VDP control word explicitly:
+;   01xxxxxx xxxxxxxx xxxxxx..  (VRAM write)
 vdp_set_vram_write:
-    movem.l d1,-(sp)
-    move.l  d0,d1
-    andi.l  #$0000FFFF,d1
+    movem.l d1-d2,-(sp)
+    move.w  d0,d1
+    andi.w  #$3FFF,d1
     swap    d1
+    move.w  d0,d2
+    andi.w  #$C000,d2
+    lsr.w   #8,d2
+    lsr.w   #6,d2
+    or.w    d2,d1
     ori.l   #$40000000,d1
     move.l  d1,VDP_CTRL
-    movem.l (sp)+,d1
+    movem.l (sp)+,d1-d2
     rts
 
 ; d0 = endereço CRAM word

@@ -30,20 +30,3 @@ main_frame:
     jsr present_frame
     jsr debug_overlay_draw
     rts
-
-color_buffer:
-    ds.b (RENDER_W*RENDER_H)/2
-cam_vertices:
-    ds.b MAX_VERTICES*VERT3_SIZE
-proj_vertices:
-    ds.b MAX_VERTICES*VERT2_SIZE
-visible_faces:
-    ds.b MAX_VISIBLE_FACES*VFACE_SIZE
-tri_tmp_vertices:
-    ds.b 3*VERT2_SIZE
-tri_setup_state:
-    ds.b 64
-present_tile_buffer:
-    ds.b PRESENT_TILE_BYTES
-present_name_table:
-    ds.b PRESENT_NAME_BYTES

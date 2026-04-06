@@ -36,8 +36,3 @@ pad_read:
     and.w  pad_prev,d1
     move.w d1,pad_rel
     rts
-
-pad_prev:   ds.w 1
-pad_cur:    ds.w 1
-pad_press:  ds.w 1
-pad_rel:    ds.w 1

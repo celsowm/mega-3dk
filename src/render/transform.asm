@@ -70,6 +70,7 @@ transform_mesh_vertices:
     neg.l   d1
 .z_pos_1:
     add.l   d1,d0                  ; x1
+    move.l  d0,d5                  ; save x1
 
     move.l  tr_sy,d2
     tst.l   VERT3_X(a1)
@@ -108,34 +109,26 @@ transform_mesh_vertices:
     add.l   d4,d0
     add.l   #CAMERA_Z_BIAS,d0      ; z2 final in d0
 
-    ; store camera-space (rough)
+    ; store camera-space
     move.l  d0,VERT3_Z(a3)
     move.l  d3,VERT3_Y(a3)
-    move.l  d2,VERT3_X(a3)
+    move.l  d5,VERT3_X(a3)
 
     ; projection scale = PROJ_DISTANCE * recip(z_int)
-    move.l  d0,d1
-    swap    d1
-    ext.l   d1
-    move.w  d1,d0
+    swap    d0
+    ext.l   d0
+    tst.l   d0
+    bgt.s   .z_ok
+    moveq   #1,d0
+.z_ok:
     bsr     lut_recip
     move.l  d0,d1
     move.l  #PROJ_DISTANCE,d0
     bsr     fixed_mul_16_16        ; d0 = scale 16.16
     move.l  d0,a4                  ; save scale in a4
 
-    ; project x using x1 in d2? actually x1 was d0 earlier, so rebuild quickly
-    move.l  tr_cy,d0
-    tst.l   VERT3_X(a1)
-    bpl.s   .x_pos_3
-    neg.l   d0
-.x_pos_3:
-    move.l  tr_sy,d1
-    tst.l   VERT3_Z(a1)
-    bpl.s   .z_pos_3
-    neg.l   d1
-.z_pos_3:
-    add.l   d1,d0                  ; x1 rebuilt
+    ; project x using saved x1
+    move.l  d5,d0
     move.l  a4,d1
     bsr     fixed_mul_16_16
     bsr     fixed_to_int
@@ -162,10 +155,3 @@ transform_mesh_vertices:
 
     movem.l (sp)+,d2-d7/a0-a4
     rts
-
-tr_sx:  ds.l 1
-tr_cx:  ds.l 1
-tr_sy:  ds.l 1
-tr_cy:  ds.l 1
-tr_sz:  ds.l 1
-tr_cz:  ds.l 1
