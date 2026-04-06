@@ -54,7 +54,7 @@ tri_setup:
     moveq   #0,d6
     tst.l   d7
     blt.s   .flags_ok              ; Cross < 0: Short edge on right, flag=0
-    moveq   #1,d6                  ; Cross > 0: Short edge on left, flag=1
+    moveq   #1,d6                  ; Cross >= 0: Short edge on left, flag=1
 .flags_ok:
     move.w  d6,tri_setup_state+TS_FLAGS
     move.w  d6,debug_last_tri_flags

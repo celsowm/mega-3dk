@@ -50,7 +50,7 @@ build_visible_face_list:
     muls.w  d4,d3
     sub.l   d3,d2
 
-    ; Y-down screen convention: front faces have cross < 0.
+    ; Y-down screen convention: front faces arrive with cross < 0.
     tst.l   d2
     bge.s   .skip_face
 

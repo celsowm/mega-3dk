@@ -27,9 +27,10 @@ New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
 $Output = Join-Path $ScreenshotsDir ("bizhawk-{0}.png" -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
 $LuaPath = Join-Path $TempDir 'bizhawk-screenshot.lua'
 $OutputLua = $Output -replace '\\','\\'
+$FrameCount = 180
 
 $LuaScript = @"
-for i = 1, 8 do
+for i = 1, $FrameCount do
   emu.frameadvance()
 end
 

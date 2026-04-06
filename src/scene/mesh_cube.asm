@@ -14,18 +14,18 @@ mesh_cube_vertices:
     dc.l  65536, 65536, 65536
     dc.l -65536, 65536, 65536
 mesh_cube_faces:
-    dc.w 0,1,2,1
-    dc.w 0,2,3,1
-    dc.w 4,6,5,2
-    dc.w 4,7,6,2
-    dc.w 0,4,5,3
-    dc.w 0,5,1,3
-    dc.w 3,2,6,4
-    dc.w 3,6,7,4
-    dc.w 1,5,6,5
-    dc.w 1,6,2,5
-    dc.w 0,3,7,6
-    dc.w 0,7,4,6
+    dc.w 0,2,1,2
+    dc.w 0,3,2,2
+    dc.w 4,5,6,3
+    dc.w 4,6,7,3
+    dc.w 0,5,4,4
+    dc.w 0,1,5,4
+    dc.w 3,6,2,5
+    dc.w 3,7,6,5
+    dc.w 1,6,5,6
+    dc.w 1,2,6,6
+    dc.w 0,7,3,7
+    dc.w 0,4,7,7
 mesh_cube_edges:
     dc.w 0,1
     dc.w 1,2

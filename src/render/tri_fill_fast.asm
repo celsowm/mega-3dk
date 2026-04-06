@@ -35,8 +35,10 @@ tri_fill_fast:
     or.b    d6,d7
 
     ; 3. Calculate dx_long (v0 -> v2)
+    moveq   #0,d0
     move.w  16(a1),d0
     sub.w   (a1),d0                ; dx_long_int = x2 - x0
+    moveq   #0,d1
     move.w  18(a1),d1
     sub.w   2(a1),d1               ; dy_long_int = y2 - y0
     bsr     .calc_step             ; d0 = dx_long (16.8)
@@ -59,8 +61,10 @@ tri_fill_fast:
 
     ; Calculate dx_short for top half
     movem.l d0-d1,-(sp)            ; Preserve current X positions
+    moveq   #0,d0
     move.w  8(a1),d0
     sub.w   (a1),d0                ; dx_top_int = x1 - x0
+    moveq   #0,d1
     move.w  d4,d1                  ; dy_top
     bsr     .calc_step             ; d0 = dx_short
     move.l  d0,d3
@@ -87,8 +91,10 @@ tri_fill_fast:
 
     ; Calculate dx_short for bottom half
     movem.l d0-d1,-(sp)            ; Preserve x_long and x_short
+    moveq   #0,d0
     move.w  16(a1),d0
     sub.w   8(a1),d0               ; dx_bot_int = x2 - x1
+    moveq   #0,d1
     move.w  d4,d1                  ; dy_bot
     bsr     .calc_step             ; d0 = dx_short
     move.l  d0,d3
@@ -126,7 +132,7 @@ tri_fill_fast:
     move.l  d0,d6
     swap    d6
     andi.w  #$FFFF,d6              ; d6 = dividend >> 16
-    move.w  4(sp),d1               ; d1 = divisor
+    move.w  6(sp),d1               ; d1 = divisor low word
     cmp.w   d1,d6
     bhs.s   .cs_overflow
     
@@ -167,22 +173,16 @@ tri_fill_fast:
     mulu.w  #(RENDER_W/2),d6
     adda.l  d6,a0
 
-    ; Convert 16.8 to Integer
-    move.l  d0,d6
-    asr.l   #8,d6                  ; d6 = x_long_int
-    move.l  d1,d2
-    asr.l   #8,d2                  ; d2 = x_short_int
-    
-    ; Decide left/right based on TS_FLAGS
-    tst.w   tri_setup_state+TS_FLAGS
-    beq.s   .ds_short_right
-    ; Flag=1: Short edge is LEFT (d2=left, d6=right)
-    move.w  d6,d3                  ; d3 = x_right (long)
-    bra.s   .ds_clip_x
-.ds_short_right:
-    ; Flag=0: Short edge is RIGHT (d6=left, d2=right)
-    move.w  d2,d3                  ; d3 = x_right (short)
-    move.w  d6,d2                  ; d2 = x_left (long)
+    ; Convert 16.8 to integer and choose left/right directly.
+    ; This avoids depending on edge-side flags for the actual fill decision.
+    cmp.l   d1,d0
+    ble.s   .ds_ordered
+    exg     d0,d1
+.ds_ordered:
+    move.l  d0,d2
+    asr.l   #8,d2                  ; d2 = x_left
+    move.l  d1,d3
+    asr.l   #8,d3                  ; d3 = x_right
 
 .ds_clip_x:
     ; X Clipping
