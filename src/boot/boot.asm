@@ -15,6 +15,12 @@
     include "../render/clear.asm"
     include "../render/transform.asm"
     include "../render/wire.asm"
+    include "../render/cull.asm"
+    include "../render/painter.asm"
+    include "../render/tri_sort_y.asm"
+    include "../render/tri_setup.asm"
+    include "../render/tri_fill_fast.asm"
+    include "../render/solid.asm"
     include "../render/present.asm"
     include "../debug/overlay.asm"
 BootEntry:

@@ -30,7 +30,7 @@ ASM_SRCS := $(wildcard $(SRC)/boot/*.asm) \
             $(wildcard $(SRC)/math/*.asm) \
             $(wildcard $(SRC)/debug/*.asm)
 
-.PHONY: all build assets run dev clean info bootstrap emulator
+.PHONY: all build assets run screenshot dev clean info bootstrap emulator
 
 all: build
 
@@ -52,6 +52,13 @@ ifeq ($(OS),Windows_NT)
 	powershell -NoProfile -Command "Start-Process '$(BLASTEM)' -ArgumentList '$(ROM)'"
 else
 	$(BLASTEM) $(ROM) &
+endif
+
+screenshot: $(ROM)
+ifeq ($(OS),Windows_NT)
+	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/screenshot-windows.ps1
+else
+	@echo "screenshot target is Windows-only for now"
 endif
 
 dev: build run

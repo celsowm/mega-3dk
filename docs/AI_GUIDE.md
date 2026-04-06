@@ -13,6 +13,7 @@ The Makefile performs real assembly and emulator launch. Key targets:
 |--------|-------------|
 | `make build` | Run asset generators + assemble ROM with vasm |
 | `make run` | Launch BlastEm emulator with the ROM |
+| `make screenshot` | Launch BlastEm and auto-send `P` for a screenshot |
 | `make dev` | Build + run in one step |
 | `make clean` | Remove build artifacts |
 | `make bootstrap` | Download/compile vasm toolchain |
@@ -23,6 +24,7 @@ The Makefile performs real assembly and emulator launch. Key targets:
 - **Assembler:** `toolchain/vasm/vasmm68k_mot.exe` (Motorola syntax, flat binary output)
 - **Emulator:** `emulator/blastem-win64-0.6.3-pre/blastem.exe`
 - **Asset generators:** `tools/gen_lut.py` (sin/recip LUTs), `tools/pack_mesh.py` (mesh data)
+- **Screenshot helper:** `scripts/screenshot-windows.ps1` launches BlastEm, waits 2 seconds, focuses the window, and sends `P`
 
 ### Include paths
 vasm needs `-I` flags for every source subdirectory. The assembler uses a single-file include model (`boot.asm` includes everything), not separate object linking. All `xref`/`xdef` warnings are harmless in this mode.

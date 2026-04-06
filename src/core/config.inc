@@ -5,6 +5,7 @@ RENDER_W             equ 160
 RENDER_H             equ 112
 RENDER_COLOR_BG      equ 0
 RENDER_COLOR_FG      equ 15
+RENDER_PIPELINE_MODE equ 2      ; 0=wire, 1=visible-face wire, 2=solid fill
 
 SCREEN_CENTER_X      equ 80
 SCREEN_CENTER_Y      equ 56
@@ -27,7 +28,7 @@ PRESENT_OFF_Y        equ ((28-PRESENT_TILE_H)/2)
 
 MAX_VERTICES         equ 128
 MAX_FACES            equ 256
-MAX_VISIBLE_FACES    equ 256
+MAX_VISIBLE_FACES    equ 32
 
 ; Mega Drive work RAM is at $FF0000-$FFFFFF; keep the stack near the top.
 STACK_TOP            equ $00FFFFFC

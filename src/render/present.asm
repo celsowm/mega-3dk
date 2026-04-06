@@ -3,6 +3,7 @@
     include "src/hw/vdp.inc"
 
     xdef present_frame
+    xdef present_fill_debug_tiles
     xdef present_pack_full_frame_4bpp_to_tiles
     xdef present_build_linear_name_table
     xdef present_upload_minimal_cpu
@@ -20,6 +21,18 @@ present_frame:
     bsr     present_pack_full_frame_4bpp_to_tiles
     bsr     present_build_linear_name_table
     bsr     present_upload_minimal_cpu
+    rts
+
+; Debug fill: set all tile bytes to $FF so the visible area should turn solid white.
+present_fill_debug_tiles:
+    movem.l d0-d2/a0,-(sp)
+    lea     present_tile_buffer,a0
+    move.w  #(PRESENT_TILE_BYTES/4)-1,d0
+    move.l  #$FFFFFFFF,d1
+.loop:
+    move.l  d1,(a0)+
+    dbra    d0,.loop
+    movem.l (sp)+,d0-d2/a0
     rts
 
 present_pack_full_frame_4bpp_to_tiles:

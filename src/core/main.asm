@@ -13,6 +13,10 @@
     xdef present_tile_buffer
     xdef present_name_table
 
+    xref draw_scene_wire
+    xref draw_scene_visible_wire
+    xref draw_scene_solid
+
 main_init:
     jsr vdp_init
     jsr pad_init
@@ -26,7 +30,14 @@ main_frame:
     jsr scene_bench_update
     jsr clear_color_buffer
     jsr transform_mesh_vertices
+    ifeq RENDER_PIPELINE_MODE
     jsr draw_scene_wire
+    endc
+    ifeq RENDER_PIPELINE_MODE-1
+    jsr draw_scene_visible_wire
+    endc
+    ifeq RENDER_PIPELINE_MODE-2
+    jsr draw_scene_solid
+    endc
     jsr present_frame
-    jsr debug_overlay_draw
     rts

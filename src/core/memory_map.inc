@@ -41,7 +41,8 @@ tr_cz                equ WRAM_BASE+$003C
 color_buffer         equ WRAM_BASE+$0040
 cam_vertices         equ WRAM_BASE+$2340
 proj_vertices        equ WRAM_BASE+$2940
-visible_faces        equ WRAM_BASE+$2D40
+visible_face_count   equ WRAM_BASE+$2F3E
+visible_faces        equ WRAM_BASE+$2F40
 tri_tmp_vertices     equ WRAM_BASE+$3940
 tri_setup_state      equ WRAM_BASE+$3958
 present_tile_buffer  equ WRAM_BASE+$3998
