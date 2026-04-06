@@ -14,24 +14,23 @@
     xdef present_name_table
 
 main_init:
-    bsr vdp_init
-    bsr pad_init
-    bsr scene_bench_init
-    bsr profiler_reset
+    jsr vdp_init
+    jsr pad_init
+    jsr scene_bench_init
+    jsr profiler_reset
     rts
 
 main_frame:
-    bsr wait_vblank
-    bsr pad_read
-    bsr scene_bench_update
-    bsr clear_color_buffer
-    bsr transform_mesh_vertices
-    bsr draw_scene_wire
-    bsr present_frame
-    bsr debug_overlay_draw
+    jsr wait_vblank
+    jsr pad_read
+    jsr scene_bench_update
+    jsr clear_color_buffer
+    jsr transform_mesh_vertices
+    jsr draw_scene_wire
+    jsr present_frame
+    jsr debug_overlay_draw
     rts
 
-    section bss
 color_buffer:
     ds.b (RENDER_W*RENDER_H)/2
 cam_vertices:

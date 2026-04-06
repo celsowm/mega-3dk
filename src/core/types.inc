@@ -1,3 +1,6 @@
+    ifnd MEGA3DK_TYPES_INC
+MEGA3DK_TYPES_INC   equ 1
+
 VERT3_X      equ 0
 VERT3_Y      equ 4
 VERT3_Z      equ 8
@@ -20,3 +23,4 @@ VFACE_I2     equ 4
 VFACE_DEPTH  equ 6
 VFACE_COLOR  equ 10
 VFACE_SIZE   equ 12
+    endif

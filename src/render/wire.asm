@@ -116,13 +116,17 @@ draw_line:
 
     cmp.w   line_dy,d5
     blt.s   .skip_x
-    add.w   line_dy,line_err
+    move.w  line_err,d6
+    add.w   line_dy,d6
+    move.w  d6,line_err
     add.w   line_sx,d0
 .skip_x:
     move.w  line_e2,d5
     cmp.w   line_dx,d5
     bgt.s   .skip_y
-    add.w   line_dx,line_err
+    move.w  line_err,d6
+    add.w   line_dx,d6
+    move.w  d6,line_err
     add.w   line_sy,d1
 .skip_y:
     bra.s   .loop
@@ -159,7 +163,6 @@ draw_scene_wire:
     movem.l (sp)+,d2-d7/a0-a1
     rts
 
-    section bss
 line_x1:    ds.w 1
 line_y1:    ds.w 1
 line_dx:    ds.w 1

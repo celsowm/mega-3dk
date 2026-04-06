@@ -115,7 +115,8 @@ transform_mesh_vertices:
 
     ; projection scale = PROJ_DISTANCE * recip(z_int)
     move.l  d0,d1
-    asr.l   #FIX_SHIFT,d1
+    swap    d1
+    ext.l   d1
     move.w  d1,d0
     bsr     lut_recip
     move.l  d0,d1
@@ -162,7 +163,6 @@ transform_mesh_vertices:
     movem.l (sp)+,d2-d7/a0-a4
     rts
 
-    section bss
 tr_sx:  ds.l 1
 tr_cx:  ds.l 1
 tr_sy:  ds.l 1

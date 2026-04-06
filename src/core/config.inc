@@ -1,3 +1,6 @@
+    ifnd MEGA3DK_CONFIG_INC
+MEGA3DK_CONFIG_INC   equ 1
+
 RENDER_W             equ 160
 RENDER_H             equ 112
 RENDER_COLOR_BG      equ 0
@@ -24,3 +27,4 @@ MAX_FACES            equ 256
 MAX_VISIBLE_FACES    equ 256
 
 STACK_TOP            equ $00FFFC
+    endif

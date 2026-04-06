@@ -1,3 +1,6 @@
+    ifnd MEGA3DK_VDP_INC
+MEGA3DK_VDP_INC         equ 1
+
 VDP_REG_MODE1           equ $8004
 VDP_REG_MODE2           equ $8174
 VDP_REG_PLANEA          equ $8230      ; plane A @ $C000
@@ -19,3 +22,5 @@ VDP_VRAM_FRAME_TILES    equ $0000
 VDP_STATUS_VBLANK       equ 3
 
 VDP_CRAM_BASE            equ $0000
+
+    endif

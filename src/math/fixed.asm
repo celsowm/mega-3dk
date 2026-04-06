@@ -5,12 +5,13 @@
 
 ; d0 = int -> 16.16
 fixed_from_int:
-    lsl.l   #FIX_SHIFT,d0
+    swap    d0
     rts
 
 ; d0 = 16.16 -> integer word sign-extended in d0
 fixed_to_int:
-    asr.l   #FIX_SHIFT,d0
+    swap    d0
+    ext.l   d0
     rts
 
 ; d0 = a, d1 = b, retorna d0 = a*b em 16.16

@@ -49,7 +49,7 @@ vdp_set_vram_write:
     movem.l d1,-(sp)
     move.l  d0,d1
     andi.l  #$0000FFFF,d1
-    lsl.l   #16,d1
+    swap    d1
     ori.l   #$40000000,d1
     move.l  d1,VDP_CTRL
     movem.l (sp)+,d1
@@ -60,7 +60,7 @@ vdp_set_cram_write:
     movem.l d1,-(sp)
     move.l  d0,d1
     andi.l  #$0000007F,d1
-    lsl.l   #16,d1
+    swap    d1
     ori.l   #$C0000000,d1
     move.l  d1,VDP_CTRL
     movem.l (sp)+,d1

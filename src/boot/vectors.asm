@@ -1,4 +1,3 @@
-    include "../core/config.inc"
     org $000000
     dc.l STACK_TOP
     dc.l Reset

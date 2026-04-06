@@ -8,15 +8,6 @@
     xref mesh_cube
     xref pad_cur
 
-PAD_UP      equ $0001
-PAD_DOWN    equ $0002
-PAD_LEFT    equ $0004
-PAD_RIGHT   equ $0008
-PAD_B       equ $0010
-PAD_C       equ $0020
-PAD_A       equ $0040
-PAD_START   equ $0080
-
 scene_bench_init:
     lea mesh_cube,a0
     move.l a0,scene_active_mesh
@@ -50,7 +41,6 @@ scene_bench_update:
 .no_down:
     rts
 
-    section bss
 scene_active_mesh:
     ds.l 1
 scene_rot_x:

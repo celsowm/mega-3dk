@@ -5,6 +5,5 @@ profiler_reset:
     clr.l prof_lines_drawn
     rts
 
-    section bss
 prof_lines_drawn:
     ds.l 1

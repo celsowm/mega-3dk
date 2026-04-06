@@ -27,7 +27,8 @@ pad_read:
     move.w pad_cur,pad_prev
     clr.w  pad_cur
     move.w pad_cur,d0
-    eor.w  pad_prev,d0
+    move.w pad_prev,d1
+    eor.w  d1,d0
     move.w d0,d1
     and.w  pad_cur,d1
     move.w d1,pad_press
@@ -36,7 +37,6 @@ pad_read:
     move.w d1,pad_rel
     rts
 
-    section bss
 pad_prev:   ds.w 1
 pad_cur:    ds.w 1
 pad_press:  ds.w 1
