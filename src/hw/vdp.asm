@@ -30,6 +30,7 @@ vdp_init:
     move.w  #VDP_REG_HSCROLL,VDP_CTRL
     move.w  #VDP_REG_AUTOINC2,VDP_CTRL
     move.w  #VDP_REG_PLANESIZE,VDP_CTRL
+    bsr     vdp_clear_tile0
     bsr     vdp_init_default_palette
     rts
 
@@ -99,6 +100,18 @@ vdp_upload_cram_words_cpu:
     dbra    d2,.loop
 .done:
     movem.l (sp)+,d2
+    rts
+
+; Clear VRAM tile 0 (32 bytes = 16 words) so blank name-table entries show nothing.
+vdp_clear_tile0:
+    movem.l d0-d1,-(sp)
+    moveq   #0,d0
+    bsr     vdp_set_vram_write
+    moveq   #16-1,d0
+.ct0:
+    move.w  #0,VDP_DATA
+    dbra    d0,.ct0
+    movem.l (sp)+,d0-d1
     rts
 
 vdp_init_default_palette:

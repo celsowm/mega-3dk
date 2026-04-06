@@ -124,6 +124,8 @@ present_build_linear_name_table:
 present_upload_minimal_cpu:
     movem.l d0-d2/a0,-(sp)
 
+    move.w  #VDP_REG_MODE2_OFF,VDP_CTRL  ; display off during upload
+
     lea     present_tile_buffer,a0
     move.w  #(VDP_VRAM_FRAME_TILES + (PRESENT_TILE_BASE*32)),d0
     move.w  #(PRESENT_TILE_BYTES/2),d1
@@ -133,6 +135,8 @@ present_upload_minimal_cpu:
     move.w  #VDP_VRAM_PLANEA,d0
     move.w  #(PRESENT_PLANE_W*28),d1
     bsr     vdp_upload_words_cpu
+
+    move.w  #VDP_REG_MODE2,VDP_CTRL      ; display on
 
     movem.l (sp)+,d0-d2/a0
     rts

@@ -13,18 +13,23 @@ The Makefile performs real assembly and emulator launch. Key targets:
 |--------|-------------|
 | `make build` | Run asset generators + assemble ROM with vasm |
 | `make run` | Launch BlastEm emulator with the ROM |
+| `make run-bizhawk` | Launch BizHawk with the ROM |
 | `make screenshot` | Launch BlastEm and auto-send `P` for a screenshot |
+| `make screenshot-bizhawk` | Launch BizHawk and save a PNG screenshot from the active window |
 | `make dev` | Build + run in one step |
 | `make clean` | Remove build artifacts |
 | `make bootstrap` | Download/compile vasm toolchain |
 | `make emulator` | Download BlastEm |
-| `make info` | Print paths for vasm, ROM, BlastEm |
+| `make bizhawk` | Download BizHawk |
+| `make info` | Print paths for vasm, ROM, BlastEm, BizHawk |
 
 ### Toolchain
 - **Assembler:** `toolchain/vasm/vasmm68k_mot.exe` (Motorola syntax, flat binary output)
 - **Emulator:** `emulator/blastem-win64-0.6.3-pre/blastem.exe`
+- **BizHawk:** `emulator/BizHawk-<version>-win-x64/EmuHawk.exe` or equivalent extracted folder
 - **Asset generators:** `tools/gen_lut.py` (sin/recip LUTs), `tools/pack_mesh.py` (mesh data)
 - **Screenshot helper:** `scripts/screenshot-windows.ps1` launches BlastEm, waits 2 seconds, focuses the window, and sends `P`
+- **BizHawk screenshot helper:** `scripts/screenshot-bizhawk-windows.ps1` launches BizHawk, focuses the window, sends `Alt+PrintScreen`, and saves the clipboard image to `screenshots/`
 
 ### Include paths
 vasm needs `-I` flags for every source subdirectory. The assembler uses a single-file include model (`boot.asm` includes everything), not separate object linking. All `xref`/`xdef` warnings are harmless in this mode.

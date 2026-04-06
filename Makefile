@@ -10,10 +10,13 @@ ifeq ($(OS),Windows_NT)
   VASM     := $(ROOT)/toolchain/vasm/vasmm68k_mot.exe
   BLASTEM  := $(shell powershell -NoProfile -Command \
     "(Get-ChildItem '$(ROOT)/emulator' -Filter 'blastem*.exe' -Recurse | Select-Object -First 1).FullName")
+  BIZHAWK  := $(shell powershell -NoProfile -Command \
+    "(Get-ChildItem '$(ROOT)/emulator' -Filter 'EmuHawk.exe' -Recurse | Select-Object -First 1).FullName")
   MKDIR    = powershell -NoProfile -Command "New-Item -ItemType Directory -Force -Path '$(1)' | Out-Null"
 else
   VASM     := $(ROOT)/toolchain/vasm/vasmm68k_mot
   BLASTEM  := $(shell find $(ROOT)/emulator -maxdepth 2 -type f \( -name 'blastem' -o -name 'blastem64' \) 2>/dev/null | head -n 1)
+  BIZHAWK  :=
   MKDIR    = mkdir -p $(1)
 endif
 
@@ -30,7 +33,7 @@ ASM_SRCS := $(wildcard $(SRC)/boot/*.asm) \
             $(wildcard $(SRC)/math/*.asm) \
             $(wildcard $(SRC)/debug/*.asm)
 
-.PHONY: all build assets run screenshot dev clean info bootstrap emulator
+.PHONY: all build assets run run-bizhawk screenshot screenshot-bizhawk dev clean info bootstrap emulator bizhawk
 
 all: build
 
@@ -49,16 +52,58 @@ build: $(ROM)
 
 run: $(ROM)
 ifeq ($(OS),Windows_NT)
+ifneq ($(strip $(BLASTEM)),)
 	powershell -NoProfile -Command "Start-Process '$(BLASTEM)' -ArgumentList '$(ROM)'"
 else
+	@echo "BlastEm not found under: $(ROOT)/emulator"
+	@exit /b 1
+endif
+else
+ifneq ($(strip $(BLASTEM)),)
 	$(BLASTEM) $(ROM) &
+else
+	@echo "BlastEm not found under: $(ROOT)/emulator"
+	@false
+endif
+endif
+
+run-bizhawk: $(ROM)
+ifeq ($(OS),Windows_NT)
+ifneq ($(strip $(BIZHAWK)),)
+	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-bizhawk-windows.ps1
+else
+	@echo "BizHawk not found under: $(ROOT)/emulator"
+	@exit /b 1
+endif
+else
+	@echo "run-bizhawk target is Windows-only for now"
+	@false
 endif
 
 screenshot: $(ROM)
 ifeq ($(OS),Windows_NT)
+ifneq ($(strip $(BLASTEM)),)
 	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/screenshot-windows.ps1
 else
+	@echo "BlastEm not found under: $(ROOT)/emulator"
+	@exit /b 1
+endif
+else
 	@echo "screenshot target is Windows-only for now"
+	@false
+endif
+
+screenshot-bizhawk: $(ROM)
+ifeq ($(OS),Windows_NT)
+ifneq ($(strip $(BIZHAWK)),)
+	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/screenshot-bizhawk-windows.ps1
+else
+	@echo "BizHawk not found under: $(ROOT)/emulator"
+	@exit /b 1
+endif
+else
+	@echo "screenshot-bizhawk target is Windows-only for now"
+	@false
 endif
 
 dev: build run
@@ -77,6 +122,13 @@ else
 	bash scripts/download-emulator-linux.sh
 endif
 
+bizhawk:
+ifeq ($(OS),Windows_NT)
+	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/download-bizhawk-windows.ps1
+else
+	@echo "bizhawk target is Windows-only for now"
+endif
+
 clean:
 	rm -rf $(BUILD)/*
 
@@ -84,4 +136,5 @@ info:
 	@echo "Entry:    $(ENTRY)"
 	@echo "ROM:      $(ROM)"
 	@echo "VASM:     $(VASM)"
-	@echo "BlastEm:  $(BLASTEM)"
+	@echo "BlastEm:  $(if $(strip $(BLASTEM)),$(BLASTEM),not found)"
+	@echo "BizHawk:  $(if $(strip $(BIZHAWK)),$(BIZHAWK),not found)"
