@@ -7,7 +7,7 @@ RENDER_COLOR_BG      equ 0
 RENDER_COLOR_FG      equ 15
 RENDER_PIPELINE_MODE equ 2      ; 0=wire, 1=visible-face wire, 2=solid fill
 DEBUG_VIEW_MODE      equ 0      ; 0=normal, 1=static scene, 2=present pattern
-DEBUG_FREEZE_SCENE   equ 1      ; 1 disables auto-rotation for BizHawk inspection
+DEBUG_FREEZE_SCENE   equ 0      ; 1 disables auto-rotation for BizHawk inspection
 
 SCREEN_CENTER_X      equ 80
 SCREEN_CENTER_Y      equ 56

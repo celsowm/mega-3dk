@@ -86,7 +86,7 @@ draw_scene_visible_wire:
 draw_scene_solid:
     movem.l d2-d7/a0-a3,-(sp)
 
-    bsr     build_solid_face_list
+    bsr     build_visible_face_list
     bsr     painter_sort_faces
 
     lea     visible_faces,a0

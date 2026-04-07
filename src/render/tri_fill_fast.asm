@@ -35,10 +35,8 @@ tri_fill_fast:
     or.b    d6,d7
 
     ; 3. Calculate dx_long (v0 -> v2)
-    moveq   #0,d0
     move.w  16(a1),d0
     sub.w   (a1),d0                ; dx_long_int = x2 - x0
-    moveq   #0,d1
     move.w  18(a1),d1
     sub.w   2(a1),d1               ; dy_long_int = y2 - y0
     bsr     .calc_step             ; d0 = dx_long (16.8)
@@ -49,9 +47,9 @@ tri_fill_fast:
     sub.w   2(a1),d4               ; dy_top = y1 - y0
     
     ; Initial X positions
-    moveq   #0,d0
     move.w  (a1),d0
-    lsl.l   #8,d0                  ; x_long = x0 (16.8)
+    ext.l   d0
+    asl.l   #8,d0                  ; x_long = x0 (16.8)
     move.l  d0,d1                  ; x_short = x0 (16.8)
     
     move.w  2(a1),d5               ; y_current = y0
@@ -61,10 +59,8 @@ tri_fill_fast:
 
     ; Calculate dx_short for top half
     movem.l d0-d1,-(sp)            ; Preserve current X positions
-    moveq   #0,d0
     move.w  8(a1),d0
     sub.w   (a1),d0                ; dx_top_int = x1 - x0
-    moveq   #0,d1
     move.w  d4,d1                  ; dy_top
     bsr     .calc_step             ; d0 = dx_short
     move.l  d0,d3
@@ -85,16 +81,14 @@ tri_fill_fast:
     ble.s   .done
 
     ; Reset x_short to v1.x (x_long continues from where it was)
-    moveq   #0,d1
     move.w  8(a1),d1
-    lsl.l   #8,d1                  ; x_short = x1 (16.8)
+    ext.l   d1
+    asl.l   #8,d1                  ; x_short = x1 (16.8)
 
     ; Calculate dx_short for bottom half
     movem.l d0-d1,-(sp)            ; Preserve x_long and x_short
-    moveq   #0,d0
     move.w  16(a1),d0
     sub.w   8(a1),d0               ; dx_bot_int = x2 - x1
-    moveq   #0,d1
     move.w  d4,d1                  ; dy_bot
     bsr     .calc_step             ; d0 = dx_short
     move.l  d0,d3
@@ -114,50 +108,19 @@ tri_fill_fast:
 ; --- Subroutines ---
 
 ; In: d0=dx (word), d1=dy (word). Out: d0=step (16.8, long)
-; Robust 68000 division with overflow protection.
 .calc_step:
     tst.w   d1
     beq.s   .cs_zero
-    
-    move.l  d1,-(sp)               ; Save divisor
-    move.l  d0,-(sp)               ; Save original dx for sign
-    
     ext.l   d0
-    bpl.s   .cs_pos
-    neg.l   d0                     ; d0 = abs(dx)
-.cs_pos:
-    lsl.l   #8,d0                  ; d0 = dx << 8
-    
-    ; Overflow check: if (dividend >> 16) >= divisor
-    move.l  d0,d6
-    swap    d6
-    andi.w  #$FFFF,d6              ; d6 = dividend >> 16
-    move.w  6(sp),d1               ; d1 = divisor low word
-    cmp.w   d1,d6
-    bhs.s   .cs_overflow
-    
-    divu.w  d1,d0
-    andi.l  #$FFFF,d0
-    bra.s   .cs_apply_sign
-
-.cs_overflow:
-    move.l  #$0000FFFF,d0
-
-.cs_apply_sign:
-    move.l  (sp)+,d1               ; original dx
-    tst.l   d1
-    bpl.s   .cs_sign_done
-    neg.l   d0
-.cs_sign_done:
-    move.l  (sp)+,d1               ; restore divisor
+    asl.l   #8,d0
+    divs.w  d1,d0
+    ext.l   d0                     ; sign-extend quotient to long
     rts
-
 .cs_zero:
     moveq   #0,d0
     rts
 
 ; In: d0=x_long, d1=x_short, d7=packed_color, d5=y_current
-; Preserves all main loop registers.
 .draw_span:
     ; Y Clipping
     cmpi.w  #0,d5
@@ -167,62 +130,56 @@ tri_fill_fast:
 
     movem.l d0-d6/a0/a2,-(sp)
 
-    ; Line Base Address
     lea     color_buffer,a0
     move.w  d5,d6
     mulu.w  #(RENDER_W/2),d6
     adda.l  d6,a0
 
-    ; Convert 16.8 to integer and choose left/right directly.
-    ; This avoids depending on edge-side flags for the actual fill decision.
-    cmp.l   d1,d0
-    ble.s   .ds_ordered
-    exg     d0,d1
-.ds_ordered:
+    ; Pick left/right
     move.l  d0,d2
-    asr.l   #8,d2                  ; d2 = x_left
     move.l  d1,d3
+    cmp.l   d3,d2
+    ble.s   .ordered
+    exg     d2,d3
+.ordered:
+    asr.l   #8,d2                  ; d2 = x_left
     asr.l   #8,d3                  ; d3 = x_right
 
-.ds_clip_x:
     ; X Clipping
     cmpi.w  #0,d2
-    bge.s   .ds_x0_ok
+    bge.s   .x0_ok
     moveq   #0,d2
-.ds_x0_ok:
+.x0_ok:
     cmpi.w  #RENDER_W-1,d3
-    ble.s   .ds_x1_ok
+    ble.s   .x1_ok
     move.w  #RENDER_W-1,d3
-.ds_x1_ok:
-    move.w  d5,debug_last_span_y
-    move.w  d2,debug_last_span_x0
-    move.w  d3,debug_last_span_x1
+.x1_ok:
+    ; Exclusive right edge: skip if x_left >= x_right
     cmp.w   d3,d2
-    bgt.w   .ds_pop_done           ; Nothing to draw
+    bge.w   .ds_pop_done           ; Nothing to draw
+    subq.w  #1,d3                  ; End pixel is exclusive
 
-    ; Setup pointers
-    move.w  d2,d1                  ; x_start
     move.w  d2,d6
     lsr.w   #1,d6                  ; byte offset
-    lea     0(a0,d6.w),a2          ; a2 = current byte
+    lea     0(a0,d6.w),a2
     
     move.w  d3,-(sp)               ; Save x_end
-    lsr.w   #1,d3                  ; d3 = end byte offset
-    move.w  d3,d4                  ; d4 = end byte index
+    lsr.w   #1,d3
+    move.w  d3,d4                  ; end byte index
     
     cmp.w   d4,d6
     beq.s   .ds_same_byte
 
     ; Multi-byte span
-    btst    #0,d1                  ; Check if x_start is odd
+    btst    #0,d2
     beq.s   .ds_first_full
-    ; Odd start: paint low nibble, move to next byte
-    move.b  (a2),d2
-    andi.b  #$F0,d2
+    ; Odd start
+    move.b  (a2),d1
+    andi.b  #$F0,d1
     move.b  d7,d0
     andi.b  #$0F,d0
-    or.b    d0,d2
-    move.b  d2,(a2)+
+    or.b    d0,d1
+    move.b  d1,(a2)+
     addq.w  #1,d6
     bra.s   .ds_mid_check
 .ds_first_full:
@@ -230,55 +187,55 @@ tri_fill_fast:
     addq.w  #1,d6
 
 .ds_mid_check:
-    move.w  d4,d2
-    sub.w   d6,d2                  ; distance from current to end byte
-    subq.w  #1,d2                  ; middle bytes only: last byte is handled separately
+    move.w  d4,d1
+    sub.w   d6,d1
+    subq.w  #2,d1
     blt.s   .ds_last_byte
 .ds_mid_loop:
     move.b  d7,(a2)+
-    dbra    d2,.ds_mid_loop
+    dbra    d1,.ds_mid_loop
 
 .ds_last_byte:
-    move.w  (sp)+,d4               ; Restore x_end
+    move.w  (sp)+,d4
     btst    #0,d4
-    beq.s   .ds_last_high          ; x_end even -> only high nibble
+    beq.s   .ds_last_high
     move.b  d7,(a2)
     bra.s   .ds_pop_done
 .ds_last_high:
-    move.b  (a2),d2
-    andi.b  #$0F,d2
+    move.b  (a2),d1
+    andi.b  #$0F,d1
     move.b  d7,d0
     andi.b  #$F0,d0
-    or.b    d0,d2
-    move.b  d2,(a2)
+    or.b    d0,d1
+    move.b  d1,(a2)
     bra.s   .ds_pop_done
 
 .ds_same_byte:
-    move.w  (sp)+,d4               ; Restore x_end
-    btst    #0,d1                  ; x_start
+    move.w  (sp)+,d4
+    btst    #0,d2
     beq.s   .ds_sb_even
     ; Odd start in same byte
-    move.b  (a2),d2
-    andi.b  #$F0,d2
+    move.b  (a2),d1
+    andi.b  #$F0,d1
     move.b  d7,d0
     andi.b  #$0F,d0
-    or.b    d0,d2
-    move.b  d2,(a2)
+    or.b    d0,d1
+    move.b  d1,(a2)
     bra.s   .ds_pop_done
 .ds_sb_even:
-    btst    #0,d4                  ; x_end
+    btst    #0,d4
     beq.s   .ds_sb_even_high
     ; Full byte
     move.b  d7,(a2)
     bra.s   .ds_pop_done
 .ds_sb_even_high:
     ; High nibble only
-    move.b  (a2),d2
-    andi.b  #$0F,d2
+    move.b  (a2),d1
+    andi.b  #$0F,d1
     move.b  d7,d0
     andi.b  #$F0,d0
-    or.b    d0,d2
-    move.b  d2,(a2)
+    or.b    d0,d1
+    move.b  d1,(a2)
 
 .ds_pop_done:
     movem.l (sp)+,d0-d6/a0/a2
