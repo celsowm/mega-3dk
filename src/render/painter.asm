@@ -3,9 +3,6 @@
 
     xdef painter_sort_faces
 
-    xref visible_faces
-    xref visible_face_count
-
 ; Bubble sort visible faces by depth descending (back-to-front).
 ; For a cube, at most 6 visible faces — bubble sort is fine.
 painter_sort_faces:

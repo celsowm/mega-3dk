@@ -4,15 +4,6 @@
     xdef draw_scene_solid
     xdef draw_scene_visible_wire
 
-    xref build_visible_face_list
-    xref painter_sort_faces
-    xref visible_faces
-    xref visible_face_count
-    xref proj_vertices
-    xref tri_setup
-    xref draw_scene_wire
-    xref draw_line
-
 draw_scene_visible_wire:
     movem.l d2-d7/a0-a2,-(sp)
 
@@ -86,12 +77,12 @@ draw_scene_visible_wire:
 draw_scene_solid:
     movem.l d2-d7/a0-a3,-(sp)
 
-    bsr     build_visible_face_list
+    bsr     build_solid_face_list
     bsr     painter_sort_faces
 
     lea     visible_faces,a0
     move.w  visible_face_count,d0
-    beq.w   .fallback_wire
+    beq.w   .done
     subq.w  #1,d0
     move.w  d0,d7
 
@@ -125,10 +116,6 @@ draw_scene_solid:
 .done:
     movem.l (sp)+,d2-d7/a0-a3
     rts
-
-.fallback_wire:
-    bsr     draw_scene_wire
-    bra.w   .done
 
 ; Build the full cube face list for solid rendering.
 ; Solid mode does not need back-face culling to produce a correct cube, and

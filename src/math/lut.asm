@@ -3,9 +3,6 @@
     xdef lut_cos
     xdef lut_recip
 
-    xref sin_lut
-    xref recip_lut
-
 ; d0 = angle 0..1023 -> d0 = sin(angle) 16.16
 lut_sin:
     andi.w  #SIN_LUT_COUNT-1,d0

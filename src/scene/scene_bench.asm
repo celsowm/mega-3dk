@@ -1,3 +1,5 @@
+    include "src/core/config.inc"
+
     xdef scene_bench_init
     xdef scene_bench_update
     xdef scene_active_mesh
@@ -5,40 +7,35 @@
     xdef scene_rot_y
     xdef scene_rot_z
 
-    xref mesh_cube
-    xref pad_cur
-
 scene_bench_init:
     lea mesh_cube,a0
     move.l a0,scene_active_mesh
-    clr.w scene_rot_x
-    clr.w scene_rot_y
-    clr.w scene_rot_z
+    move.w #DEBUG_START_ROT_X,scene_rot_x
+    move.w #DEBUG_START_ROT_Y,scene_rot_y
+    move.w #DEBUG_START_ROT_Z,scene_rot_z
     rts
 
 scene_bench_update:
-    ifeq DEBUG_FREEZE_SCENE
-    ; rotação automática leve
-    addq.w #2,scene_rot_y
-    addq.w #1,scene_rot_x
+    ifne DEBUG_FREEZE_SCENE
+    rts
     endc
 
-    ; input já integrado à API, mesmo antes da leitura real do pad.
+    ; Manual rotation control on D-pad.
     move.w pad_cur,d0
     btst #2,d0
     beq.s .no_left
-    subq.w #2,scene_rot_y
+    subi.w #24,scene_rot_y
 .no_left:
     btst #3,d0
     beq.s .no_right
-    addq.w #2,scene_rot_y
+    addi.w #24,scene_rot_y
 .no_right:
     btst #0,d0
     beq.s .no_up
-    subq.w #2,scene_rot_x
+    subi.w #24,scene_rot_x
 .no_up:
     btst #1,d0
     beq.s .no_down
-    addq.w #2,scene_rot_x
+    addi.w #24,scene_rot_x
 .no_down:
     rts

@@ -7,7 +7,12 @@ RENDER_COLOR_BG      equ 0
 RENDER_COLOR_FG      equ 15
 RENDER_PIPELINE_MODE equ 2      ; 0=wire, 1=visible-face wire, 2=solid fill
 DEBUG_VIEW_MODE      equ 0      ; 0=normal, 1=static scene, 2=present pattern
-DEBUG_FREEZE_SCENE   equ 0      ; 1 disables auto-rotation for BizHawk inspection
+DEBUG_FREEZE_SCENE   equ 0      ; 1 keeps the initial debug pose fixed
+DEBUG_START_ROT_X    equ 128    ; initial debug pose, in engine rotation units
+DEBUG_START_ROT_Y    equ 160
+DEBUG_START_ROT_Z    equ 0
+DEBUG_PIPELINE_STAGE equ 4      ; -1=normal mode, 0=present pattern, 1=clear+present,
+                                ; 2=wire, 3=visible-wire, 4=solid
 
 SCREEN_CENTER_X      equ 80
 SCREEN_CENTER_Y      equ 56
@@ -35,3 +40,24 @@ MAX_VISIBLE_FACES    equ 32
 ; Mega Drive work RAM is at $FF0000-$FFFFFF; keep the stack near the top.
 STACK_TOP            equ $00FFFFFC
     endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

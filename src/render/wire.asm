@@ -5,12 +5,6 @@
     xdef draw_line
     xdef draw_scene_wire
 
-    xref color_buffer
-    xref proj_vertices
-    xref mesh_cube_edges
-    xref mesh_cube_edge_count
-    xref prof_lines_drawn
-
     xdef line_x1
     xdef line_y1
     xdef line_dx

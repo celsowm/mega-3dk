@@ -3,19 +3,6 @@
 
     xdef transform_mesh_vertices
 
-    xref scene_active_mesh
-    xref scene_rot_x
-    xref scene_rot_y
-    xref scene_rot_z
-    xref proj_vertices
-    xref cam_vertices
-
-    xref lut_sin
-    xref lut_cos
-    xref lut_recip
-    xref fixed_mul_16_16
-    xref fixed_to_int
-
     xdef tr_sx
     xdef tr_cx
     xdef tr_sy

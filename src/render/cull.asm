@@ -4,21 +4,14 @@
     xdef build_visible_face_list
     xdef visible_face_count
 
-    xref mesh_cube_faces
-    xref proj_vertices
-    xref cam_vertices
-    xref visible_faces
-
-; Build visible face list with back-face culling.
-; Uses screen-space cross product to reject back faces.
-; Stores visible faces with depth sum for painter sort.
+; Build visible face list with a single responsibility:
+; test each triangle in camera space and append the front-facing ones.
 build_visible_face_list:
-    movem.l d2-d7/a0-a3,-(sp)
+    movem.l d2-d7/a0-a4,-(sp)
 
     lea     mesh_cube_faces,a0
-    lea     proj_vertices,a1
-    lea     cam_vertices,a2
-    lea     visible_faces,a3
+    lea     cam_vertices,a4
+    lea     visible_faces,a2
     moveq   #0,d6
     moveq   #12-1,d7
 
@@ -27,67 +20,30 @@ build_visible_face_list:
     move.w  FACE_I1(a0),d1
     move.w  FACE_I2(a0),d2
 
-    move.w  d0,d3
-    lsl.w   #3,d3
-    move.w  d1,d4
-    lsl.w   #3,d4
-    move.w  d2,d5
-    lsl.w   #3,d5
+    bsr     .tri_front_facing
+    beq.s   .skip_face
 
-    move.w  VERT2_X(a1,d3.w),d0   ; x0
-    move.w  VERT2_Y(a1,d3.w),d1   ; y0
-    move.w  VERT2_X(a1,d4.w),d2   ; x1
-    move.w  VERT2_Y(a1,d4.w),d3   ; y1
-    move.w  VERT2_X(a1,d5.w),d4   ; x2
-    move.w  VERT2_Y(a1,d5.w),d5   ; y2
+    move.w  FACE_I0(a0),d3
+    move.w  FACE_I1(a0),d4
+    move.w  FACE_I2(a0),d5
 
-    sub.w   d0,d2                 ; dx01
-    sub.w   d1,d3                 ; dy01
-    sub.w   d0,d4                 ; dx02
-    sub.w   d1,d5                 ; dy02
+    ; Use summed camera-space Z for painter ordering.
+    ; (Average is unnecessary for sorting and DIVS packs quotient/remainder in d0.)
+    moveq   #0,d0
+    move.w  d3,d1
+    bsr     .add_vertex_z
+    move.w  d4,d1
+    bsr     .add_vertex_z
+    move.w  d5,d1
+    bsr     .add_vertex_z
 
-    muls.w  d5,d2
-    muls.w  d4,d3
-    sub.l   d3,d2
+    move.w  FACE_I0(a0),VFACE_I0(a2)
+    move.w  FACE_I1(a0),VFACE_I1(a2)
+    move.w  FACE_I2(a0),VFACE_I2(a2)
+    move.l  d0,VFACE_DEPTH(a2)
+    move.w  FACE_COLOR(a0),VFACE_COLOR(a2)
 
-    ; Y-down screen convention: front faces arrive with cross < 0.
-    tst.l   d2
-    bge.s   .skip_face
-
-    ; Recompute cam offsets from indices for depth sum.
-    move.w  FACE_I0(a0),d0
-    move.w  FACE_I1(a0),d1
-    move.w  FACE_I2(a0),d2
-
-    move.w  d0,d3
-    lsl.w   #3,d3
-    move.w  d0,d4
-    lsl.w   #2,d4
-    add.w   d4,d3
-
-    move.w  d1,d4
-    lsl.w   #3,d4
-    move.w  d1,d5
-    lsl.w   #2,d5
-    add.w   d5,d4
-
-    move.w  d2,d5
-    lsl.w   #3,d5
-    move.w  d2,d0
-    lsl.w   #2,d0
-    add.w   d0,d5
-
-    move.l  VERT3_Z(a2,d3.w),d0
-    add.l   VERT3_Z(a2,d4.w),d0
-    add.l   VERT3_Z(a2,d5.w),d0
-
-    move.w  FACE_I0(a0),VFACE_I0(a3)
-    move.w  FACE_I1(a0),VFACE_I1(a3)
-    move.w  FACE_I2(a0),VFACE_I2(a3)
-    move.l  d0,VFACE_DEPTH(a3)
-    move.w  FACE_COLOR(a0),VFACE_COLOR(a3)
-
-    lea     VFACE_SIZE(a3),a3
+    lea     VFACE_SIZE(a2),a2
     addq.w  #1,d6
 
 .skip_face:
@@ -95,5 +51,131 @@ build_visible_face_list:
     dbra    d7,.loop
 
     move.w  d6,visible_face_count
-    movem.l (sp)+,d2-d7/a0-a3
+    movem.l (sp)+,d2-d7/a0-a4
+    rts
+
+; In: d0/d1/d2 = face vertex indices.
+; Out: d0 = 1 when front-facing, 0 otherwise.
+.tri_front_facing:
+    movem.l d1-d7/a3,-(sp)
+    move.w  d2,a3
+
+    ; p0 = cam(v0) in integer camera-space units (16.16 -> int16)
+    move.w  d0,d6
+    lsl.w   #3,d6
+    move.w  d0,d7
+    lsl.w   #2,d7
+    add.w   d7,d6
+    move.l  VERT3_X(a4,d6.w),d3
+    swap    d3
+    ext.l   d3
+    move.l  VERT3_Y(a4,d6.w),d4
+    swap    d4
+    ext.l   d4
+    move.l  VERT3_Z(a4,d6.w),d5
+    swap    d5
+    ext.l   d5
+
+    ; save p0 words on stack: [z0, y0, x0]
+    move.w  d3,-(sp)
+    move.w  d4,-(sp)
+    move.w  d5,-(sp)
+
+    ; p1
+    move.w  d1,d6
+    lsl.w   #3,d6
+    move.w  d1,d7
+    lsl.w   #2,d7
+    add.w   d7,d6
+    move.l  VERT3_X(a4,d6.w),d0
+    swap    d0
+    ext.l   d0
+    move.l  VERT3_Y(a4,d6.w),d1
+    swap    d1
+    ext.l   d1
+    move.l  VERT3_Z(a4,d6.w),d2
+    swap    d2
+    ext.l   d2
+
+    ; e1 = p1 - p0
+    sub.w   4(sp),d0
+    sub.w   2(sp),d1
+    sub.w   (sp),d2
+
+    ; p2
+    move.w  a3,d6
+    lsl.w   #3,d6
+    move.w  a3,d7
+    lsl.w   #2,d7
+    add.w   d7,d6
+    move.l  VERT3_X(a4,d6.w),d3
+    swap    d3
+    ext.l   d3
+    move.l  VERT3_Y(a4,d6.w),d7
+    swap    d7
+    ext.l   d7
+    move.l  VERT3_Z(a4,d6.w),d5
+    swap    d5
+    ext.l   d5
+
+    ; e2 = p2 - p0
+    move.w  d3,d6
+    sub.w   4(sp),d6
+    sub.w   2(sp),d7
+    sub.w   (sp),d5
+
+    ; nx = e1y*e2z - e1z*e2y
+    move.w  d1,d3
+    muls.w  d5,d3
+    move.w  d2,d4
+    muls.w  d7,d4
+    sub.l   d4,d3                  ; d3 = nx
+
+    ; nz = e1x*e2y - e1y*e2x
+    move.w  d0,d4
+    muls.w  d7,d4
+    move.w  d1,d1
+    muls.w  d6,d1
+    sub.l   d1,d4                  ; d4 = nz
+
+    ; ny = e1z*e2x - e1x*e2z
+    move.w  d2,d1
+    muls.w  d6,d1
+    move.w  d0,d7
+    muls.w  d5,d7
+    sub.l   d7,d1                  ; d1 = ny
+
+    ; dot = n . p0
+    move.w  4(sp),d0
+    muls.w  d0,d3                  ; nx*x0
+    move.w  2(sp),d0
+    muls.w  d0,d1                  ; ny*y0
+    add.l   d1,d3
+    move.w  (sp),d0
+    muls.w  d0,d4                  ; nz*z0
+    add.l   d4,d3                  ; d3 = dot
+
+    addq.l  #6,sp
+
+    ; Camera at origin looking +Z: outward normal facing camera yields dot < 0.
+    moveq   #0,d1
+    tst.l   d3
+    blt.s   .tf_front
+    bra.s   .tf_done
+.tf_front:
+    moveq   #1,d1
+.tf_done:
+    move.w  d1,d0
+    movem.l (sp)+,d1-d7/a3
+    rts
+
+; In: d1 = vertex index.
+; In/out: d0 = accumulated Z.
+.add_vertex_z:
+    move.w  d1,d3
+    lsl.w   #3,d3
+    move.w  d1,d4
+    lsl.w   #2,d4
+    add.w   d4,d3
+    add.l   VERT3_Z(a4,d3.w),d0
     rts

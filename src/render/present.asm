@@ -10,11 +10,6 @@
     xdef present_upload_minimal_cpu
     xdef present_frame_debug_pattern
 
-    xref color_buffer
-    xref present_tile_buffer
-    xref present_name_table
-    xref vdp_upload_words_cpu
-
 ; v4.6
 ; O present agora fecha um caminho mínimo de CPU -> tile buffer -> name table -> VRAM.
 ; Continua sem DMA e sem validação final em emulador, então deve ser lido como um

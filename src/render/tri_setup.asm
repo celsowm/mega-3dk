@@ -5,12 +5,6 @@
 
     xdef tri_setup
 
-    xref tri_sort_vertices_by_y
-    xref tri_tmp_vertices
-    xref tri_setup_state
-    xref tri_fill_fast
-    xref draw_line
-
 tri_setup:
     move.w  d6,tri_setup_state+TS_COLOR
     bsr     tri_sort_vertices_by_y

@@ -9,8 +9,6 @@
     xdef vdp_upload_cram_words_cpu
     xdef vdp_init_default_palette
 
-    xref palette_flat16
-
 ; v4.7
 ; Bring-up mais auditável:
 ; - init mínimo do VDP
