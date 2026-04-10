@@ -33,13 +33,13 @@ tri_fill_fast:
     ble.s   .flat_max_ok
     move.w  d0,d1
 .flat_max_ok:
-    move.w  2(a1),d3
+    move.w  2(a1),d1
     move.w  tri_setup_state+TS_COLOR,d4
     andi.w  #$000F,d4
     bne.s   .flat_color_ok
     moveq   #1,d4
 .flat_color_ok:
-    bsr     draw_line
+    bsr     draw_span_fast
     bra.w   .done
 
 .y_ok:
@@ -169,9 +169,8 @@ tri_fill_fast:
     move.w  d2,d0
     move.w  d5,d1
     move.w  d3,d2
-    move.w  d5,d3
     move.w  d6,d4
-    bsr     draw_line
+    bsr     draw_span_fast
 
 .pop_done:
     movem.l (sp)+,d0-d4/d7

@@ -21,3 +21,9 @@ with open(OUT / "recip_lut.inc", "w", encoding="utf-8") as f:
     for i in range(1, COUNT):
         v = int(round(FIX / i))
         f.write(f"    dc.l {v}\n")
+
+with open(OUT / "y_offset_lut.inc", "w", encoding="utf-8") as f:
+    f.write("y_offset_lut:\n")
+    for y in range(112): # RENDER_H
+        v = y * 80       # RENDER_W / 2
+        f.write(f"    dc.w {v}\n")
