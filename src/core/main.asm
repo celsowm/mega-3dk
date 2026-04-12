@@ -5,7 +5,7 @@
 
 main_init:
     jsr m3dk_init
-    jsr scene_bench_init
+    jsr scene_demo_init
     rts
 
 main_frame:
@@ -33,7 +33,7 @@ main_frame:
     rts
     endc
     ifeq DEBUG_PIPELINE_STAGE - 2
-    jsr scene_bench_update
+    jsr scene_demo_update
     jsr m3dk_clear_frame
     jsr m3dk_transform_scene
     jsr m3dk_draw_wireframe
@@ -42,7 +42,7 @@ main_frame:
     rts
     endc
     ifeq DEBUG_PIPELINE_STAGE - 3
-    jsr scene_bench_update
+    jsr scene_demo_update
     jsr m3dk_clear_frame
     jsr m3dk_transform_scene
     jsr m3dk_draw_visible_wireframe
@@ -51,7 +51,7 @@ main_frame:
     rts
     endc
     ifeq DEBUG_PIPELINE_STAGE - 4
-    jsr scene_bench_update
+    jsr scene_demo_update
     jsr m3dk_clear_frame
     jsr m3dk_transform_scene
     jsr m3dk_draw_solid
@@ -61,7 +61,7 @@ main_frame:
     endc
 
     ; Normal path (stage disabled)
-    jsr scene_bench_update
+    jsr scene_demo_update
     jsr m3dk_clear_frame
     jsr m3dk_transform_scene
     jsr m3dk_render_scene

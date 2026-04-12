@@ -27,6 +27,8 @@ build_visible_face_list:
 
     bsr     .tri_front_facing
     beq.s   .skip_face
+    cmpi.w  #MAX_VISIBLE_FACES,d6
+    bge.s   .skip_face
 
     move.w  FACE_I0(a0),d3
     move.w  FACE_I1(a0),d4
@@ -171,6 +173,9 @@ build_solid_face_list:
     moveq   #0,d6
 
 .s_loop:
+    cmpi.w  #MAX_VISIBLE_FACES,d6
+    bge.s   .s_done
+
     move.w  FACE_I0(a0),VFACE_I0(a3)
     move.w  FACE_I1(a0),VFACE_I1(a3)
     move.w  FACE_I2(a0),VFACE_I2(a3)
@@ -193,6 +198,7 @@ build_solid_face_list:
     lea     FACE_SIZE(a0),a0
     dbra    d7,.s_loop
 
+.s_done:
     move.w  d6,visible_face_count
     movem.l (sp)+,d0-d7/a0-a4
     rts

@@ -1,8 +1,8 @@
     org $000100
     dc.b "SEGA MEGA DRIVE "
     dc.b "(C)OAI 2026    "
-    dc.b "MEGA-3DK V4 DEMO                      "
-    dc.b "MEGA-3DK V4 DEMO                      "
+    dc.b "MEGA-3DK TORUS DEMO                     "
+    dc.b "MEGA-3DK TORUS DEMO                     "
     dc.b "GM 00000000-00"
     dc.w 0
     dc.b "J               "

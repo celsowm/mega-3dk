@@ -35,7 +35,8 @@ PRESENT_OFF_Y        equ ((28-PRESENT_TILE_H)/2)
 
 MAX_VERTICES         equ 128
 MAX_FACES            equ 256
-MAX_VISIBLE_FACES    equ 32
+; visible_faces buffer in WRAM currently fits up to ~213 entries.
+MAX_VISIBLE_FACES    equ 192
 
 ; Mega Drive work RAM is at $FF0000-$FFFFFF; keep the stack near the top.
 STACK_TOP            equ $00FFFFFC
