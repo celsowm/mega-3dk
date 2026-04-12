@@ -1,42 +1,172 @@
-# mega-3dk v4.7
+# mega-3dk
 
-68000 3D engine base for Mega Drive, organized to grow from **wireframe** to **flat-shaded triangles**.
+`mega-3dk` is a Sega Mega Drive 3D SDK and engine base written in 68000 assembly.
+It is organized so other developers can build games on top of a small public API instead of reading the internal engine first.
 
-## Focus of this v4.7
-- Reduce obscure points in the bring-up
-- Correct the misalignment between `tile base` and tile upload
-- Bring up a default palette right in `vdp_init`
-- Make the path `framebuffer -> tiles -> name table -> VRAM` more auditable
+## What it gives you
 
-## Important fixes in this version
-- `PRESENT_TILE_BASE` stays **1** so tile `0` remains blank outside the centered 20x14 area
-- `vdp_init` now calls `vdp_init_default_palette`
+- a public assembly interface for game code
+- a thin C wrapper layer on top of the same API
+- starter examples in assembly and C
+- a reproducible build and package flow
+- a path from wireframe rendering toward flat-shaded 3D
 
-- Separate support for writing to **CRAM** has been added
-- `present_upload_minimal_cpu` now documents and uses the tile base coherently
-- `STACK_TOP` has been defined in `config.inc`, eliminating a boot loophole
+## Current scope
 
-## Actual state
-This v4.7 is still a **serious technical bring-up**, not a confirmed demo in the emulator. But the critical section is now shorter and has fewer obvious inconsistencies.
+The project currently focuses on a singleton engine model with:
 
-## What's already more concrete
-- Internal buffer 160x112 in 4bpp
-- `plot_pixel(x,y,color)` in high/low nibble
-- Entire Bresenham in `draw_line`
-- Cube described by edges
-- `cube-first` transformation
-- Packing of the framebuffer in 8x8 tiles
-- Linear name table 20x14
-- Minimum upload to VRAM per CPU
-- Default palette in CRAM at init
+- 160x112 4bpp software framebuffer
+- controller input polling
+- mesh selection
+- scene rotation
+- wireframe, visible-wireframe, and solid render paths
+- CPU tile packing and VRAM upload
+- public SDK packaging
 
-## What's still missing to call it a ready demo
-- Validate the first frame in the emulator
-- Check the exact VDP command if a black screen or incorrect layout appears
-- Actual reading of the 3-button controller
-- Review the `present` for DMA after the first frame is validated
+The engine is still evolving. The SDK is usable, but the renderer and asset pipeline are not yet a full long-term stable release.
 
-## Next milestones
-- v4.8: First visual frame validated
-- v4.9: Backface culling + visible faces
-- v5.0: Flat-shaded triangles
+## Public SDK
+
+Public headers and source live under `sdk/`:
+
+- [sdk/include/m3dk.inc](sdk/include/m3dk.inc) - assembly-facing public declarations
+- [sdk/include/m3dk.h](sdk/include/m3dk.h) - C-facing public header
+- [sdk/src/m3dk.c](sdk/src/m3dk.c) - C convenience wrapper
+
+Examples:
+
+- [sdk/examples/asm/minimal](sdk/examples/asm/minimal) - minimal assembly game
+- [sdk/examples/asm/multimesh](sdk/examples/asm/multimesh) - mesh switching sample
+- [sdk/examples/asm/template](sdk/examples/asm/template) - starter game template
+- [sdk/examples/c/minimal_game.c](sdk/examples/c/minimal_game.c) - minimal C usage example
+- [sdk/examples/c/template_game.c](sdk/examples/c/template_game.c) - C starter template
+
+## Quick Start
+
+Build the main ROM:
+
+```bash
+make build
+```
+
+Build the SDK examples:
+
+```bash
+make sdk-example-minimal
+make sdk-example-multimesh
+make sdk-example-template
+```
+
+Build the distributable SDK package:
+
+```bash
+make sdk-package
+```
+
+The package is written under:
+
+```text
+build/sdk-release/mega-3dk-sdk-v4.7
+```
+
+## Public API
+
+The main entry points exposed by the SDK are:
+
+- `m3dk_init`
+- `m3dk_frame_begin`
+- `m3dk_frame_end`
+- `m3dk_present_frame`
+- `m3dk_clear_frame`
+- `m3dk_transform_scene`
+- `m3dk_render_scene`
+- `m3dk_draw_wireframe`
+- `m3dk_draw_visible_wireframe`
+- `m3dk_draw_solid`
+- `m3dk_set_active_mesh`
+- `m3dk_get_active_mesh`
+- `m3dk_set_scene_rotation`
+- `m3dk_set_camera`
+- `m3dk_get_pad_cur`
+- `m3dk_get_pad_press`
+- `m3dk_get_pad_ext_cur`
+- `m3dk_get_pad_ext_press`
+
+The C wrapper also provides convenience helpers:
+
+- `m3dk_use_mesh`
+- `m3dk_set_rotation_xyz`
+- `m3dk_set_camera_values`
+- `m3dk_frame`
+
+## Usage model
+
+The intended frame flow is:
+
+1. `m3dk_init`
+2. set camera
+3. set mesh
+4. set rotation
+5. `m3dk_frame_begin`
+6. clear
+7. transform
+8. render
+9. `m3dk_frame_end`
+
+This keeps game code small and makes the engine easier to embed into a real project.
+
+## Mesh format
+
+The SDK uses a simple mesh descriptor:
+
+- vertices are 16.16 fixed-point `x/y/z` triplets
+- faces store 3 vertex indices plus a palette index
+- edges store 2 vertex indices
+- counts are explicit and fixed-size
+
+This is enough for the current wireframe and flat-shaded pipeline.
+
+## Repository layout
+
+- [src/](src) - internal engine code
+- [sdk/](sdk) - public SDK headers, wrapper, and examples
+- [docs/](docs) - SDK docs, roadmap, and technical notes
+- [tools/](tools) - asset generators
+- [scripts/](scripts) - build and packaging helpers
+- [assets/](assets) - generated and source assets
+
+## Build targets
+
+- `make build` - build the main ROM
+- `make sdk-example-minimal` - build the minimal SDK example
+- `make sdk-example-multimesh` - build the multi-mesh example
+- `make sdk-example-template` - build the starter template
+- `make sdk-package` - build and package the SDK release
+- `make run` - launch the main ROM in the configured emulator
+
+## Status
+
+What works now:
+
+- public SDK surface
+- assembly examples
+- C wrapper source
+- package generation
+- wireframe and solid render paths
+
+What still needs work:
+
+- a real external C cross-build workflow
+- a more complete public scene API
+- better asset tooling beyond the current simple mesh format
+- performance upgrades such as DMA and dirty-tile tracking
+
+## Documentation
+
+- [docs/SDK.md](docs/SDK.md)
+- [docs/ROADMAP.md](docs/ROADMAP.md)
+- [docs/AI_GUIDE.md](docs/AI_GUIDE.md)
+
+## License
+
+No explicit license file is present yet. Add one before distributing externally.

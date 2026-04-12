@@ -1,6 +1,7 @@
     include "vectors.asm"
     include "header.asm"
     org $000200
+    include "../sdk/api.asm"
     include "../core/main.asm"
     include "../core/loop.asm"
     include "../hw/vdp.asm"

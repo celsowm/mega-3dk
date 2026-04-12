@@ -61,4 +61,6 @@ debug_last_tri_v1x   equ WRAM_BASE+$65DA
 debug_last_tri_v1y   equ WRAM_BASE+$65DC
 debug_last_tri_v2x   equ WRAM_BASE+$65DE
 debug_last_tri_v2y   equ WRAM_BASE+$65E0
+camera_proj_distance equ WRAM_BASE+$65E4
+camera_z_bias        equ WRAM_BASE+$65E8
     endif

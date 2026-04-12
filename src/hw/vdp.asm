@@ -29,6 +29,8 @@ vdp_init:
     move.w  #VDP_REG_AUTOINC2,VDP_CTRL
     move.w  #VDP_REG_PLANESIZE,VDP_CTRL
     bsr     vdp_clear_tile0
+    move.l  #PROJ_DISTANCE,camera_proj_distance
+    move.l  #CAMERA_Z_BIAS,camera_z_bias
     bsr     vdp_init_default_palette
     rts
 

@@ -3,6 +3,7 @@ SRC      := $(ROOT)/src
 BUILD    := $(ROOT)/build
 ROM      := $(BUILD)/rom/mega-3dk.bin
 ENTRY    := $(SRC)/boot/boot.asm
+SDK_ROOT := $(ROOT)/sdk
 TOOLS    := $(ROOT)/tools
 
 # Detect OS
@@ -20,7 +21,7 @@ else
   MKDIR    = mkdir -p $(1)
 endif
 
-INCDIRS  := src src/boot src/core src/hw src/render src/scene src/data src/math src/debug
+INCDIRS  := src src/boot src/core src/hw src/render src/scene src/data src/math src/debug sdk/include
 VASMFLAGS := -Fbin -m68000 -spaces $(foreach d,$(INCDIRS),-I $(ROOT)/$(d))
 
 # Collect all source files for dependency tracking
@@ -31,9 +32,14 @@ ASM_SRCS := $(wildcard $(SRC)/boot/*.asm) \
             $(wildcard $(SRC)/scene/*.asm) \
             $(wildcard $(SRC)/data/*.asm) \
             $(wildcard $(SRC)/math/*.asm) \
-            $(wildcard $(SRC)/debug/*.asm)
+            $(wildcard $(SRC)/debug/*.asm) \
+            $(wildcard $(SRC)/sdk/*.asm) \
+            $(wildcard $(ROOT)/sdk/examples/asm/minimal/*.asm) \
+            $(wildcard $(ROOT)/sdk/examples/asm/multimesh/*.asm) \
+            $(wildcard $(ROOT)/sdk/examples/asm/template/*.asm)
 
-.PHONY: all build assets run run-bizhawk screenshot screenshot-bizhawk dev clean info bootstrap emulator bizhawk
+.PHONY: all build assets run run-bizhawk screenshot screenshot-bizhawk dev clean info bootstrap emulator bizhawk \
+        sdk-example-minimal sdk-example-multimesh sdk-example-template sdk-package
 
 all: build
 
@@ -49,6 +55,15 @@ $(ROM): $(ASM_SRCS) | assets
 
 build: $(ROM)
 	@echo "ROM built: $(ROM)"
+
+sdk-example-minimal:
+	$(MAKE) ENTRY=$(SDK_ROOT)/examples/asm/minimal/boot.asm ROM=$(BUILD)/rom/mega-3dk-sdk-minimal.bin build
+
+sdk-example-multimesh:
+	$(MAKE) ENTRY=$(SDK_ROOT)/examples/asm/multimesh/boot.asm ROM=$(BUILD)/rom/mega-3dk-sdk-multimesh.bin build
+
+sdk-example-template:
+	$(MAKE) ENTRY=$(SDK_ROOT)/examples/asm/template/boot.asm ROM=$(BUILD)/rom/mega-3dk-sdk-template.bin build
 
 run: $(ROM)
 ifeq ($(OS),Windows_NT)
@@ -131,6 +146,9 @@ endif
 
 clean:
 	rm -rf $(BUILD)/*
+
+sdk-package: build sdk-example-minimal sdk-example-multimesh sdk-example-template
+	python3 scripts/package_sdk.py
 
 info:
 	@echo "Entry:    $(ENTRY)"

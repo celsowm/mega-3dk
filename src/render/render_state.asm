@@ -19,3 +19,5 @@
     xdef debug_last_tri_v1y
     xdef debug_last_tri_v2x
     xdef debug_last_tri_v2y
+    xdef camera_proj_distance
+    xdef camera_z_bias

@@ -1,4 +1,5 @@
     include "src/core/config.inc"
+    include "src/core/memory_map.inc"
     include "src/core/types.inc"
 
     xdef transform_mesh_vertices
@@ -91,7 +92,7 @@ transform_mesh_vertices:
     move.l  tr_cx,d1
     bsr     fixed_mul_16_16
     add.l   d5,d0
-    add.l   #CAMERA_Z_BIAS,d0      ; d0 = z2 final
+    add.l   camera_z_bias,d0       ; d0 = z2 final
 
     ; Z Rotation:
     ; x3 = x1*cz - y2*sz
@@ -136,7 +137,7 @@ transform_mesh_vertices:
 .z_ok:
     bsr     lut_recip
     move.l  d0,d1
-    move.l  #PROJ_DISTANCE,d0
+    move.l  camera_proj_distance,d0
     bsr     fixed_mul_16_16        ; d0 = scale 16.16
     move.l  d0,a4                  ; save scale in a4
 

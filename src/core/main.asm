@@ -1,21 +1,16 @@
     include "src/core/config.inc"
-    include "src/core/types.inc"
 
     xdef main_init
     xdef main_frame
 
 main_init:
-    jsr vdp_init
-    jsr pad_init
+    jsr m3dk_init
     jsr scene_bench_init
-    jsr profiler_reset
     rts
 
 main_frame:
-    jsr wait_vblank
-    jsr pad_read
-    jsr profiler_reset
-    ifeq DEBUG_VIEW_MODE-2
+    jsr m3dk_frame_begin
+    ifeq DEBUG_VIEW_MODE - 2
     jsr present_frame_debug_pattern
     rts
     endc
@@ -31,53 +26,45 @@ main_frame:
     jsr present_frame_debug_pattern
     rts
     endc
-    ifeq DEBUG_PIPELINE_STAGE-1
-    jsr clear_color_buffer
+    ifeq DEBUG_PIPELINE_STAGE - 1
+    jsr m3dk_clear_frame
     jsr debug_overlay_draw
-    jsr present_frame
+    jsr m3dk_frame_end
     rts
     endc
-    ifeq DEBUG_PIPELINE_STAGE-2
+    ifeq DEBUG_PIPELINE_STAGE - 2
     jsr scene_bench_update
-    jsr clear_color_buffer
-    jsr transform_mesh_vertices
-    jsr draw_scene_wire
+    jsr m3dk_clear_frame
+    jsr m3dk_transform_scene
+    jsr m3dk_draw_wireframe
     jsr debug_overlay_draw
-    jsr present_frame
+    jsr m3dk_frame_end
     rts
     endc
-    ifeq DEBUG_PIPELINE_STAGE-3
+    ifeq DEBUG_PIPELINE_STAGE - 3
     jsr scene_bench_update
-    jsr clear_color_buffer
-    jsr transform_mesh_vertices
-    jsr draw_scene_visible_wire
+    jsr m3dk_clear_frame
+    jsr m3dk_transform_scene
+    jsr m3dk_draw_visible_wireframe
     jsr debug_overlay_draw
-    jsr present_frame
+    jsr m3dk_frame_end
     rts
     endc
-    ifeq DEBUG_PIPELINE_STAGE-4
+    ifeq DEBUG_PIPELINE_STAGE - 4
     jsr scene_bench_update
-    jsr clear_color_buffer
-    jsr transform_mesh_vertices
-    jsr draw_scene_solid
+    jsr m3dk_clear_frame
+    jsr m3dk_transform_scene
+    jsr m3dk_draw_solid
     jsr debug_overlay_draw
-    jsr present_frame
+    jsr m3dk_frame_end
     rts
     endc
 
     ; Normal path (stage disabled)
     jsr scene_bench_update
-    jsr clear_color_buffer
-    jsr transform_mesh_vertices
-    ifeq RENDER_PIPELINE_MODE
-    jsr draw_scene_wire
-    endc
-    ifeq RENDER_PIPELINE_MODE-1
-    jsr draw_scene_visible_wire
-    endc
-    ifeq RENDER_PIPELINE_MODE-2
-    jsr draw_scene_solid
-    endc
+    jsr m3dk_clear_frame
+    jsr m3dk_transform_scene
+    jsr m3dk_render_scene
     jsr debug_overlay_draw
-    jsr present_frame
+    jsr m3dk_frame_end
     rts

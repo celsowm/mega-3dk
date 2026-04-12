@@ -1,0 +1,39 @@
+    include "../../../../src/boot/vectors.asm"
+    include "../../../../src/boot/header.asm"
+    org $000200
+    include "main.asm"
+    include "../../../../src/hw/vdp.asm"
+    include "../../../../src/hw/pad.asm"
+    include "../../../../src/core/profiler.asm"
+    include "../../../../src/scene/mesh_cube.asm"
+    include "../../../../src/scene/mesh_pyramid.asm"
+    include "../../../../src/scene/mesh_prism.asm"
+    include "../../../../src/scene/mesh_dodeca.asm"
+    include "../../../../src/scene/mesh_frustum.asm"
+    include "../../../../src/scene/mesh_star.asm"
+    include "../../../../src/data/palette.asm"
+    include "../../../../src/data/luts.asm"
+    include "../../../../src/math/lut.asm"
+    include "../../../../src/math/fixed.asm"
+    include "../../../../src/render/render_state.asm"
+    include "../../../../src/render/clear.asm"
+    include "../../../../src/render/transform.asm"
+    include "../../../../src/render/raster.asm"
+    include "../../../../src/render/wire.asm"
+    include "../../../../src/render/face_list.asm"
+    include "../../../../src/render/painter.asm"
+    include "../../../../src/render/tri_sort_y.asm"
+    include "../../../../src/render/tri_setup.asm"
+    include "../../../../src/render/tri_fill_fast.asm"
+    include "../../../../src/render/solid.asm"
+    include "../../../../src/render/present.asm"
+    include "../../../../src/debug/overlay.asm"
+    include "../../../../src/sdk/api.asm"
+BootEntry:
+    move    #$2700,sr
+    move.l  #STACK_TOP,sp
+    jsr     main_init
+main_forever:
+    jsr     main_frame
+    bra     main_forever
+EndROM:
