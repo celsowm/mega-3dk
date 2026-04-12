@@ -1,28 +1,8 @@
     include "src/core/config.inc"
-    include "src/core/memory_map.inc"
     include "src/core/types.inc"
 
     xdef main_init
     xdef main_frame
-    xdef color_buffer
-    xdef cam_vertices
-    xdef proj_vertices
-    xdef visible_faces
-    xdef tri_tmp_vertices
-    xdef tri_setup_state
-    xdef present_tile_buffer
-    xdef present_name_table
-    xdef debug_last_span_y
-    xdef debug_last_span_x0
-    xdef debug_last_span_x1
-    xdef debug_last_tri_flags
-    xdef debug_last_tri_color
-    xdef debug_last_tri_v0x
-    xdef debug_last_tri_v0y
-    xdef debug_last_tri_v1x
-    xdef debug_last_tri_v1y
-    xdef debug_last_tri_v2x
-    xdef debug_last_tri_v2y
 
 main_init:
     jsr vdp_init

@@ -46,3 +46,5 @@ mesh_cube:
     dc.l mesh_cube_faces
     dc.w 8
     dc.w 12
+    dc.l mesh_cube_edges
+    dc.w 12

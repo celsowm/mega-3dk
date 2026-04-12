@@ -1,19 +1,24 @@
     include "src/core/config.inc"
     include "src/core/types.inc"
+    include "src/core/vertex_access.inc"
+    include "src/scene/mesh.inc"
 
     xdef build_visible_face_list
+    xdef build_solid_face_list
     xdef visible_face_count
 
-; Build visible face list with a single responsibility:
-; test each triangle in camera space and append the front-facing ones.
+; Build visible face list: test each triangle in camera space
+; and append the front-facing ones.
 build_visible_face_list:
-    movem.l d2-d7/a0-a4,-(sp)
+    movem.l d2-d7/a0-a5,-(sp)
 
-    lea     mesh_cube_faces,a0
+    move.l  scene_active_mesh,a5
+    move.l  MESH_FACE_PTR(a5),a0
+    move.w  MESH_FACE_COUNT(a5),d7
+    subq.w  #1,d7
     lea     cam_vertices,a4
     lea     visible_faces,a2
     moveq   #0,d6
-    moveq   #12-1,d7
 
 .loop:
     move.w  FACE_I0(a0),d0
@@ -28,7 +33,6 @@ build_visible_face_list:
     move.w  FACE_I2(a0),d5
 
     ; Use summed camera-space Z for painter ordering.
-    ; (Average is unnecessary for sorting and DIVS packs quotient/remainder in d0.)
     moveq   #0,d0
     move.w  d3,d1
     bsr     .add_vertex_z
@@ -51,7 +55,7 @@ build_visible_face_list:
     dbra    d7,.loop
 
     move.w  d6,visible_face_count
-    movem.l (sp)+,d2-d7/a0-a4
+    movem.l (sp)+,d2-d7/a0-a5
     rts
 
 ; In: d0/d1/d2 = face vertex indices.
@@ -60,12 +64,7 @@ build_visible_face_list:
     movem.l d1-d7/a3,-(sp)
     move.w  d2,a3
 
-    ; p0 = cam(v0) in integer camera-space units (16.16 -> int16)
-    move.w  d0,d6
-    lsl.w   #3,d6
-    move.w  d0,d7
-    lsl.w   #2,d7
-    add.w   d7,d6
+    VERT3_OFFSET d0,d6,d7
     move.l  VERT3_X(a4,d6.w),d3
     swap    d3
     ext.l   d3
@@ -76,17 +75,11 @@ build_visible_face_list:
     swap    d5
     ext.l   d5
 
-    ; save p0 words on stack: [z0, y0, x0]
     move.w  d3,-(sp)
     move.w  d4,-(sp)
     move.w  d5,-(sp)
 
-    ; p1
-    move.w  d1,d6
-    lsl.w   #3,d6
-    move.w  d1,d7
-    lsl.w   #2,d7
-    add.w   d7,d6
+    VERT3_OFFSET d1,d6,d7
     move.l  VERT3_X(a4,d6.w),d0
     swap    d0
     ext.l   d0
@@ -97,17 +90,11 @@ build_visible_face_list:
     swap    d2
     ext.l   d2
 
-    ; e1 = p1 - p0
     sub.w   4(sp),d0
     sub.w   2(sp),d1
     sub.w   (sp),d2
 
-    ; p2
-    move.w  a3,d6
-    lsl.w   #3,d6
-    move.w  a3,d7
-    lsl.w   #2,d7
-    add.w   d7,d6
+    VERT3_OFFSET a3,d6,d7
     move.l  VERT3_X(a4,d6.w),d3
     swap    d3
     ext.l   d3
@@ -118,46 +105,40 @@ build_visible_face_list:
     swap    d5
     ext.l   d5
 
-    ; e2 = p2 - p0
     move.w  d3,d6
     sub.w   4(sp),d6
     sub.w   2(sp),d7
     sub.w   (sp),d5
 
-    ; nx = e1y*e2z - e1z*e2y
     move.w  d1,d3
     muls.w  d5,d3
     move.w  d2,d4
     muls.w  d7,d4
-    sub.l   d4,d3                  ; d3 = nx
+    sub.l   d4,d3
 
-    ; nz = e1x*e2y - e1y*e2x
     move.w  d0,d4
     muls.w  d7,d4
     move.w  d1,d1
     muls.w  d6,d1
-    sub.l   d1,d4                  ; d4 = nz
+    sub.l   d1,d4
 
-    ; ny = e1z*e2x - e1x*e2z
     move.w  d2,d1
     muls.w  d6,d1
     move.w  d0,d7
     muls.w  d5,d7
-    sub.l   d7,d1                  ; d1 = ny
+    sub.l   d7,d1
 
-    ; dot = n . p0
     move.w  4(sp),d0
-    muls.w  d0,d3                  ; nx*x0
+    muls.w  d0,d3
     move.w  2(sp),d0
-    muls.w  d0,d1                  ; ny*y0
+    muls.w  d0,d1
     add.l   d1,d3
     move.w  (sp),d0
-    muls.w  d0,d4                  ; nz*z0
-    add.l   d4,d3                  ; d3 = dot
+    muls.w  d0,d4
+    add.l   d4,d3
 
     addq.l  #6,sp
 
-    ; Camera at origin looking +Z: outward normal facing camera yields dot < 0.
     moveq   #0,d1
     tst.l   d3
     blt.s   .tf_front
@@ -172,10 +153,46 @@ build_visible_face_list:
 ; In: d1 = vertex index.
 ; In/out: d0 = accumulated Z.
 .add_vertex_z:
-    move.w  d1,d3
-    lsl.w   #3,d3
-    move.w  d1,d4
-    lsl.w   #2,d4
-    add.w   d4,d3
+    VERT3_OFFSET d1,d3,d4
     add.l   VERT3_Z(a4,d3.w),d0
+    rts
+
+; Build the full face list for solid rendering (no back-face culling).
+build_solid_face_list:
+    movem.l d0-d7/a0-a4,-(sp)
+
+    move.l  scene_active_mesh,a4
+    move.l  MESH_FACE_PTR(a4),a0
+    move.w  MESH_FACE_COUNT(a4),d7
+    subq.w  #1,d7
+    lea     proj_vertices,a1
+    lea     cam_vertices,a2
+    lea     visible_faces,a3
+    moveq   #0,d6
+
+.s_loop:
+    move.w  FACE_I0(a0),VFACE_I0(a3)
+    move.w  FACE_I1(a0),VFACE_I1(a3)
+    move.w  FACE_I2(a0),VFACE_I2(a3)
+    move.w  FACE_COLOR(a0),VFACE_COLOR(a3)
+
+    move.w  FACE_I0(a0),d0
+    VERT3_OFFSET d0,d0,d3
+    move.w  FACE_I1(a0),d1
+    VERT3_OFFSET d1,d1,d4
+    move.w  FACE_I2(a0),d2
+    VERT3_OFFSET d2,d2,d5
+
+    move.l  VERT3_Z(a2,d0.w),d3
+    add.l   VERT3_Z(a2,d1.w),d3
+    add.l   VERT3_Z(a2,d2.w),d3
+    move.l  d3,VFACE_DEPTH(a3)
+
+    lea     VFACE_SIZE(a3),a3
+    addq.w  #1,d6
+    lea     FACE_SIZE(a0),a0
+    dbra    d7,.s_loop
+
+    move.w  d6,visible_face_count
+    movem.l (sp)+,d0-d7/a0-a4
     rts

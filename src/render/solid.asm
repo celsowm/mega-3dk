@@ -1,5 +1,6 @@
     include "src/core/config.inc"
     include "src/core/types.inc"
+    include "src/scene/mesh.inc"
 
     xdef draw_scene_solid
     xdef draw_scene_visible_wire
@@ -115,57 +116,4 @@ draw_scene_solid:
 
 .done:
     movem.l (sp)+,d2-d7/a0-a3
-    rts
-
-; Build the full cube face list for solid rendering.
-; Solid mode does not need back-face culling to produce a correct cube, and
-; keeping all faces here avoids coupling fill bring-up to culling polarity.
-build_solid_face_list:
-    movem.l d0-d7/a0-a3,-(sp)
-
-    lea     mesh_cube_faces,a0
-    lea     proj_vertices,a1
-    lea     cam_vertices,a2
-    lea     visible_faces,a3
-    moveq   #0,d6
-    moveq   #12-1,d7
-
-.loop:
-    move.w  FACE_I0(a0),d0
-    move.w  FACE_I1(a0),d1
-    move.w  FACE_I2(a0),d2
-
-    move.w  FACE_I0(a0),VFACE_I0(a3)
-    move.w  FACE_I1(a0),VFACE_I1(a3)
-    move.w  FACE_I2(a0),VFACE_I2(a3)
-    move.w  FACE_COLOR(a0),VFACE_COLOR(a3)
-
-    move.w  FACE_I0(a0),d0
-    lsl.w   #3,d0
-    move.w  FACE_I0(a0),d3
-    lsl.w   #2,d3
-    add.w   d3,d0
-    move.w  FACE_I1(a0),d1
-    lsl.w   #3,d1
-    move.w  FACE_I1(a0),d4
-    lsl.w   #2,d4
-    add.w   d4,d1
-    move.w  FACE_I2(a0),d2
-    lsl.w   #3,d2
-    move.w  FACE_I2(a0),d5
-    lsl.w   #2,d5
-    add.w   d5,d2
-
-    move.l  VERT3_Z(a2,d0.w),d3
-    add.l   VERT3_Z(a2,d1.w),d3
-    add.l   VERT3_Z(a2,d2.w),d3
-    move.l  d3,VFACE_DEPTH(a3)
-
-    lea     VFACE_SIZE(a3),a3
-    addq.w  #1,d6
-    lea     FACE_SIZE(a0),a0
-    dbra    d7,.loop
-
-    move.w  d6,visible_face_count
-    movem.l (sp)+,d0-d7/a0-a3
     rts

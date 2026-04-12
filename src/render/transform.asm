@@ -93,6 +93,35 @@ transform_mesh_vertices:
     add.l   d5,d0
     add.l   #CAMERA_Z_BIAS,d0      ; d0 = z2 final
 
+    ; Z Rotation:
+    ; x3 = x1*cz - y2*sz
+    ; y3 = x1*sz + y2*cz
+    move.l  d0,d5                  ; save z2
+
+    move.l  d4,d0                  ; x1
+    move.l  tr_cz,d1
+    bsr     fixed_mul_16_16
+    move.l  d0,d2                  ; d2 = x1*cz
+
+    move.l  d3,d0                  ; y2
+    move.l  tr_sz,d1
+    bsr     fixed_mul_16_16
+    sub.l   d0,d2                  ; d2 = x3 = x1*cz - y2*sz
+
+    move.l  d4,d0                  ; x1
+    move.l  tr_sz,d1
+    bsr     fixed_mul_16_16
+    move.l  d0,d4                  ; d4 = x1*sz (temp)
+
+    move.l  d3,d0                  ; y2
+    move.l  tr_cz,d1
+    bsr     fixed_mul_16_16
+    add.l   d4,d0                  ; d0 = y3 = x1*sz + y2*cz
+
+    move.l  d0,d3                  ; d3 = y3
+    move.l  d2,d4                  ; d4 = x3
+    move.l  d5,d0                  ; restore z2
+
     ; store camera-space
     move.l  d0,VERT3_Z(a3)
     move.l  d3,VERT3_Y(a3)

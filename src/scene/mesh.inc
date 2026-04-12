@@ -1,5 +1,11 @@
+    ifnd MEGA3DK_MESH_INC
+MEGA3DK_MESH_INC equ 1
+
 MESH_VERT_PTR   equ 0
 MESH_FACE_PTR   equ 4
 MESH_VERT_COUNT equ 8
 MESH_FACE_COUNT equ 10
-MESH_SIZE       equ 12
+MESH_EDGE_PTR   equ 12
+MESH_EDGE_COUNT equ 16
+MESH_SIZE       equ 18
+    endif
